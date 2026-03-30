@@ -33,7 +33,7 @@ export default function Signup() {
   return (
     <View style={styles.container}>
 
-      {/*  Back Arrow */}
+      {/* Back Arrow */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#000" />
