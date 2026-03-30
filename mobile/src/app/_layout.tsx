@@ -1,12 +1,11 @@
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Stack } from "expo-router";
 
 export default function RootLayout() {
   return (
-    <>
-      <Stack />
-      <StatusBar style="auto" />
-    </>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    />
   );
 }

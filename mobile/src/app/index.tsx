@@ -1,31 +1,5 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Redirect } from "expo-router";
 
-export default function IndexScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Your App</Text>
-      <Text style={styles.subtitle}>Start building from here.</Text>
-    </View>
-  );
+export default function Index() {
+  return <Redirect href="/login" />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    opacity: 0.8,
-    textAlign: 'center',
-  },
-});
-
