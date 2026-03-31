@@ -7,3 +7,7 @@ export const loginUser = (data:any) => {
 export const signupUser = (data:any) => {
   return ApiBase.post("/signup", data);
 };
+
+export const resetPassword = (email: string) => {
+  return ApiBase.post("/reset-password", { email });
+};
