@@ -72,7 +72,11 @@ export default function Login() {
         </View>
 
         {/* Forgot */}
-        <Text style={styles.forgot}>Forgot password</Text>
+       <Pressable onPress={() => router.push("/forgot-password")}>
+  <Text style={styles.forgot}>
+    Forgot password
+  </Text>
+</Pressable>
 
         {/* Button */}
         <Pressable style={styles.button} onPress={handleLogin}>
