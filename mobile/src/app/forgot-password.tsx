@@ -1,85 +1,77 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
-  TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  TextInput,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { RFValue } from "react-native-responsive-fontsize";
 import { router } from "expo-router";
 import { sendPasswordResetEmail } from "firebase/auth";
+
+import ForgotPasswordForm from "../components/auth/ForgotPasswordForm";
+import { AUTH_COLORS } from "../constants/auth";
+import { validateForgotPasswordEmail } from "../utils/authValidation";
 import { auth } from "../config/firebaseConfig";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleReset = async () => {
-    if (!email.trim()) {
-      setError("Email is required");
-      return;
-    }
+    const validationError = validateForgotPasswordEmail(email);
 
-    if (!email.includes("@")) {
-      setError("Invalid email");
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     setError("");
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      setLoading(true);
 
-      alert("Password reset email sent");
+      await sendPasswordResetEmail(auth, email.trim());
 
+      Alert.alert("Success", "Password reset email sent");
       router.replace("/login");
-    } catch (error: any) {
-      if (error.code === "auth/user-not-found") {
-        alert("User not found");
+    } catch (err: any) {
+      if (err.code === "auth/user-not-found") {
+        Alert.alert("Error", "User not found");
+      } else if (err.code === "auth/invalid-email") {
+        Alert.alert("Error", "Invalid email address");
+      } else if (err.code === "auth/too-many-requests") {
+        Alert.alert("Error", "Too many attempts, try again later");
       } else {
-        alert("Something went wrong");
+        Alert.alert("Error", "Something went wrong");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.container}>
-            <View style={styles.card}>
-              <Text style={styles.title}>Forgot Password</Text>
-              <Text style={styles.subtitle}>
-                Enter your email to reset your password
-              </Text>
-
-              <TextInput
-                placeholder="Enter your email"
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-
-              {error ? <Text style={styles.error}>{error}</Text> : null}
-
-              <TouchableOpacity style={styles.button} onPress={handleReset}>
-                <Text style={styles.buttonText}>Reset Password</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => router.push("/login")}>
-                <Text style={styles.backLink}>Back to Login</Text>
-              </TouchableOpacity>
-            </View>
+            <ForgotPasswordForm
+              email={email}
+              error={error}
+              loading={loading}
+              onChangeEmail={(text) => {
+                setEmail(text);
+                if (error) setError("");
+              }}
+              onSubmit={handleReset}
+              onBackToLogin={() => router.push("/login")}
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -88,69 +80,20 @@ export default function ForgotPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: AUTH_COLORS.background,
+  },
+  flex: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: AUTH_COLORS.background,
     justifyContent: "center",
     paddingHorizontal: 20,
-  },
-
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#eee",
-  },
-
-  title: {
-    fontSize: RFValue(24),
-    fontWeight: "700",
-    textAlign: "center",
-    marginBottom: 5,
-  },
-
-  subtitle: {
-    fontSize: RFValue(14),
-    color: "#888",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-
-  input: {
-    backgroundColor: "#f9f9f9",
-    padding: 14,
-    borderRadius: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#eee",
-  },
-
-  error: {
-    color: "red",
-    fontSize: RFValue(12),
-    marginBottom: 10,
-  },
-
-  button: {
-    backgroundColor: "#ff6600",
-    paddingVertical: 16,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 10,
-  },
-
-  buttonText: {
-    color: "#fff",
-    fontSize: RFValue(16),
-    fontWeight: "700",
-  },
-
-  backLink: {
-    marginTop: 15,
-    textAlign: "center",
-    color: "#ff6600",
-    fontSize: RFValue(13),
-    fontWeight: "700",
   },
 });
