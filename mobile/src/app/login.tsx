@@ -1,99 +1,144 @@
-import { View, Text, TextInput, Pressable, StyleSheet, Image } from "react-native";
-import { useState } from "react";
-import { Link, router } from "expo-router";
-import { loginUser } from "@/api/UsersService";
-import { Ionicons } from "@expo/vector-icons";
-import { Dimensions } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TextInput,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { RFValue } from "react-native-responsive-fontsize";
+import { router } from "expo-router";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../config/firebaseConfig";
 
-const { width } = Dimensions.get("window");
-export default function Login() {
-
+export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+  });
+
+  const validate = () => {
+    let valid = true;
+
+    let newErrors = {
+      email: "",
+      password: "",
+    };
+
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+      valid = false;
+    } else if (!email.includes("@")) {
+      newErrors.email = "Invalid email";
+      valid = false;
+    }
+
+    if (!password.trim()) {
+      newErrors.password = "Password is required";
+      valid = false;
+    } else if (password.length < 6) {
+      newErrors.password = "Minimum 6 characters";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
 
   const handleLogin = async () => {
+    if (!validate()) return;
+
+    setLoading(true);
+
     try {
-      const res = await loginUser({ email, password });
-      console.log(res.data);
-
-      router.replace("/"); // غيرها لاحقاً
-
-    } catch (e) {
-      console.log("Login error:", e);
+      await signInWithEmailAndPassword(auth, email, password);
+      alert("Logged in successfully");
+      router.replace("/");
+    } catch (error: any) {
+      if (error.code === "auth/user-not-found") {
+        alert("User not found");
+      } else if (error.code === "auth/wrong-password") {
+        alert("Wrong password");
+      } else if (error.code === "auth/invalid-credential") {
+        alert("Wrong email or password");
+      } else {
+        alert("Login failed");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <View style={styles.container}>
+            <View style={styles.card}>
+              <Text style={styles.title}>Welcome Back</Text>
+              <Text style={styles.subtitle}>Login to continue</Text>
 
-      {/* Back */}
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </Pressable>
-      </View>
+              <TextInput
+                placeholder="Enter your email"
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              {errors.email ? (
+                <Text style={styles.error}>{errors.email}</Text>
+              ) : null}
 
-      <View style={styles.form}>
+              <TextInput
+                placeholder="Enter your password"
+                secureTextEntry
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+              />
+              {errors.password ? (
+                <Text style={styles.error}>{errors.password}</Text>
+              ) : null}
 
-        {/*  LOGO */}
-        <Image
-          source={require("../assets/images/quickmart.png")} 
-          style={styles.logo}
-        />
+              <TouchableOpacity
+                style={[styles.button, loading && { opacity: 0.6 }]}
+                onPress={handleLogin}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Login</Text>
+                )}
+              </TouchableOpacity>
 
-        <Text style={styles.title}>Log In</Text>
+              <TouchableOpacity onPress={() => router.push("/forgot-password")}>
+                <Text style={styles.link}>Forgot Password?</Text>
+              </TouchableOpacity>
 
-        {/* Email */}
-        <TextInput
-          placeholder="customer@example.com"
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        {/* Password */}
-        <View style={styles.inputWrapper}>
-          <TextInput
-            placeholder="Password"
-            secureTextEntry={!showPassword}
-            style={styles.inputWithIcon}
-            value={password}
-            onChangeText={setPassword}
-          />
-
-          <Pressable onPress={() => setShowPassword(!showPassword)}>
-            <Ionicons
-              name={showPassword ? "eye" : "eye-off"}
-              size={22}
-              color="#888"
-            />
-          </Pressable>
-        </View>
-
-        {/* Forgot */}
-       <Pressable onPress={() => router.push("/forgot-password")}>
-  <Text style={styles.forgot}>
-    Forgot password
-  </Text>
-</Pressable>
-
-        {/* Button */}
-        <Pressable style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
-        </Pressable>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text>Not have an account yet? </Text>
-          <Link href="/signup">
-            <Text style={styles.link}>Sign Up</Text>
-          </Link>
-        </View>
-
-      </View>
-
-    </View>
+              <TouchableOpacity onPress={() => router.push("/signup")}>
+                <Text style={styles.signupLink}>
+                  Don’t have an account? Sign Up
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -102,95 +147,72 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f2f2f2",
     justifyContent: "center",
-    padding: 20,
+    paddingHorizontal: 20,
   },
 
-  form: {
-    width: "100%",
-    maxWidth: 400,
-    alignSelf: "center",
-  },
-
-  header: {
-    position: "absolute",
-    top: 60,
-    left: 20,
-  },
-
-  logo: {
-     width: width * 0.8,
-  height: 150,
-  resizeMode: "contain",
-  alignSelf: "center",
-  marginBottom: 25,
-  
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "600",
-    textAlign: "center",
-    marginBottom: 25,
-  },
-
-  input: {
+  card: {
     backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 15,
+    borderRadius: 16,
+    padding: 20,
     borderWidth: 1,
     borderColor: "#eee",
   },
 
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    paddingHorizontal: 10,
+  title: {
+    fontSize: RFValue(24),
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 5,
+  },
+
+  subtitle: {
+    fontSize: RFValue(14),
+    color: "#888",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+
+  input: {
+    backgroundColor: "#f9f9f9",
+    padding: 14,
+    borderRadius: 10,
     marginBottom: 10,
     borderWidth: 1,
     borderColor: "#eee",
   },
 
-  inputWithIcon: {
-    flex: 1,
-    padding: 16,
-  },
-
-  forgot: {
-    color: "#888",
-  marginBottom: 20,
-  marginTop: 5,
-  alignSelf: "flex-end",
+  error: {
+    color: "red",
+    fontSize: RFValue(12),
+    marginBottom: 10,
   },
 
   button: {
     backgroundColor: "#ff6600",
-  padding: 16,
-  borderRadius: 12,
-  alignItems: "center",
-  width: "100%",
-  shadowColor: "#000",
-  shadowOpacity: 0.1,
-  shadowRadius: 5,
-  elevation: 3,
+    paddingVertical: 16,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 10,
   },
 
   buttonText: {
     color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-
-  footer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 20,
+    fontSize: RFValue(16),
+    fontWeight: "700",
   },
 
   link: {
+    marginTop: 15,
+    textAlign: "center",
+    color: "#888",
+    fontSize: RFValue(13),
+  },
+
+  signupLink: {
+    marginTop: 10,
+    textAlign: "center",
     color: "#ff6600",
-    fontWeight: "bold",
+    fontSize: RFValue(13),
+    fontWeight: "700",
   },
 });
