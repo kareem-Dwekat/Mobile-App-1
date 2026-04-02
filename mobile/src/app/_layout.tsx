@@ -6,23 +6,21 @@ import "react-native-reanimated";
 export default function RootLayout() {
   return (
     <>
-      <Stack>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
         <Stack.Screen name="index" options={{ title: "Home" }} />
 
         <Stack.Screen
           name="shipping-address"
-          options={{ title: "Shipping Address" }}
+          options={{ title: "Shipping Address", headerShown: true }}
         />
 
-        <Stack.Screen
-          name="payment"
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="payment" />
 
-        <Stack.Screen
-          name="add-product"
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="add-product" />
       </Stack>
 
       <StatusBar style="auto" />
