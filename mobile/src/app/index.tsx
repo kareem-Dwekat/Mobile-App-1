@@ -8,9 +8,14 @@ export default function IndexScreen() {
       <Text style={styles.title}>Your App</Text>
       <Text style={styles.subtitle}>Start building from here.</Text>
 
-      <Link href="/shipping-address" asChild>
+      <Link href="/ShippingAddressScreen" asChild>
         <Pressable style={styles.button}>
           <Text style={styles.buttonText}>Shipping Address</Text>
+        </Pressable>
+      </Link>
+      <Link href="/login" asChild>
+        <Pressable style={styles.button}>
+          <Text style={styles.buttonText}>Login</Text>
         </Pressable>
       </Link>
 
@@ -25,6 +30,7 @@ export default function IndexScreen() {
           <Text style={styles.buttonText}>Add Product</Text>
         </Pressable>
       </Link>
+      
     </View>
   );
 }
