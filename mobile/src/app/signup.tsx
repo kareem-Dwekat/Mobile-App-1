@@ -1,21 +1,22 @@
+import { router } from "expo-router";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import {
-  View,
-  StyleSheet,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
+  StyleSheet,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 
 import SignupForm from "../components/auth/SignupForm";
+import { auth, db } from "../config/firebaseConfig";
 import { AUTH_COLORS } from "../constants/auth";
-import { auth } from "../config/firebaseConfig";
-import { validateSignupForm } from "../utils/authValidation";
 import { SignupErrors } from "../types/auth";
+import { validateSignupForm } from "../utils/authValidation";
 
 export default function SignupScreen() {
   const [fullName, setFullName] = useState("");
@@ -41,20 +42,26 @@ export default function SignupScreen() {
     try {
       setLoading(true);
 
-      await createUserWithEmailAndPassword(auth, email.trim(), password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
+
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "users", user.uid), {
+        fullName,
+        email,
+        createdAt: new Date().toISOString(),
+      });
 
       Alert.alert("Success", "Account created successfully");
       router.replace("/login");
+
     } catch (error: any) {
-      if (error.code === "auth/email-already-in-use") {
-        Alert.alert("Error", "This email is already in use");
-      } else if (error.code === "auth/invalid-email") {
-        Alert.alert("Error", "Invalid email");
-      } else if (error.code === "auth/weak-password") {
-        Alert.alert("Error", "Password should be at least 6 characters");
-      } else {
-        Alert.alert("Error", "Signup failed");
-      }
+      console.log("ERROR:", error);
+      Alert.alert("Error", error?.message || "Signup failed");
     } finally {
       setLoading(false);
     }
@@ -96,7 +103,10 @@ export default function SignupScreen() {
               onChangeConfirmPassword={(text) => {
                 setConfirmPassword(text);
                 if (errors.confirmPassword) {
-                  setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+                  setErrors((prev) => ({
+                    ...prev,
+                    confirmPassword: "",
+                  }));
                 }
               }}
               onSubmit={handleSignup}

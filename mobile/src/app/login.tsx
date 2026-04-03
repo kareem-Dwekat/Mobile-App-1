@@ -10,12 +10,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
-
 import LoginForm from "../components/auth/LoginForm";
-import { AUTH_COLORS } from "../constants/auth";
-import { auth } from "../config/firebaseConfig";
+import { AUTH_COLORS } from "../constants/auth"
 import { validateLoginForm } from "../utils/authValidation";
 import { LoginErrors } from "../types/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../config/firebaseConfig";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -25,36 +25,42 @@ export default function LoginScreen() {
   const [errors, setErrors] = useState<LoginErrors>({});
 
   const handleLogin = async () => {
-    const validationErrors = validateLoginForm({
-      email,
-      password,
-    });
+  const validationErrors = validateLoginForm({
+    email,
+    password,
+  });
 
-    setErrors(validationErrors);
+  setErrors(validationErrors);
 
-    if (Object.keys(validationErrors).length > 0) return;
+  if (Object.keys(validationErrors).length > 0) return;
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      await signInWithEmailAndPassword(auth, email.trim(), password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email.trim(),
+      password
+    );
 
-      Alert.alert("Success", "Logged in successfully");
-      router.replace("/");
-    } catch (error: any) {
-      if (error.code === "auth/user-not-found") {
-        Alert.alert("Error", "User not found");
-      } else if (error.code === "auth/wrong-password") {
-        Alert.alert("Error", "Wrong password");
-      } else if (error.code === "auth/invalid-credential") {
-        Alert.alert("Error", "Wrong email or password");
-      } else {
-        Alert.alert("Error", "Login failed");
-      }
-    } finally {
-      setLoading(false);
+    const userUid = userCredential.user.uid;
+
+    const userDoc = await getDoc(doc(db, "users", userUid));
+
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+
+      Alert.alert("Welcome", userData.fullName);
     }
-  };
+
+    router.replace("/");
+
+  } catch (error: any) {
+    Alert.alert("Error", error?.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <SafeAreaView style={styles.safeArea}>
