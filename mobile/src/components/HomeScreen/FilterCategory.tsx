@@ -25,7 +25,7 @@ export const FilterCategory: React.FC<Props> = ({ categories, onSelect }) => {
       <Modal visible={visible} animationType="slide" transparent>
         <View style={styles.overlay}>
           <View style={styles.modal}>
-            {/* Header مع زر إغلاق */}
+
             <View style={styles.header}>
               <Text style={styles.title}>Select Category</Text>
               <TouchableOpacity onPress={() => setVisible(false)}>

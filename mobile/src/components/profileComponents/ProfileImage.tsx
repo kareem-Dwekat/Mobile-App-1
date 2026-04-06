@@ -1,4 +1,3 @@
-// components/ProfileImage.tsx
 import React from 'react';
 import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -32,9 +31,9 @@ const styles = StyleSheet.create({
     borderRadius: 55,
   },
   editBtn: {
-    position: 'absolute', // 🔥 مهم بدل relative
+    position: 'absolute',
     bottom: 0,
-    right: 120, // عدلها حسب مكان الصورة
+    right: 120,
     backgroundColor: '#ff6b00',
     width: 28,
     height: 28,
