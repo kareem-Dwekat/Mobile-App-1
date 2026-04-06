@@ -53,7 +53,7 @@ export default function LoginScreen() {
       Alert.alert("Welcome", userData.fullName);
     }
 
-    router.replace("/");
+    router.replace("/HomeScreen");
 
   } catch (error: any) {
     Alert.alert("Error", error?.message || "Login failed");
