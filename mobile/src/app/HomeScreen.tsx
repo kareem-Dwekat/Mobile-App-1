@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { router } from "expo-router";
 import { SearchBar } from "../components/HomeScreen/SearchBar";
 import { FilterCategory } from "../components/HomeScreen/FilterCategory";
 import { CategoryScroll } from "../components/HomeScreen/CategoryScroll";
@@ -43,8 +44,11 @@ export default function HomeScreen() {
   };
 
   const handleCategorySelect = (category: string) => {
-    setSelectedCategory(category);
-    setPage(1);
+    // 👇 بدل ما نفلتر هون، نروح على صفحة الكاتجري
+    router.push({
+      pathname: "/category/[name]",
+      params: { name: category },
+    });
   };
 
   const filteredProducts = data?.filter((item: any) => {
@@ -78,7 +82,7 @@ export default function HomeScreen() {
             </View>
             <FilterCategory
               categories={categories.map((c) => c.name)}
-              onSelect={handleCategorySelect}
+              onSelect={setSelectedCategory}
             />
           </View>
 
