@@ -8,18 +8,11 @@ export default function IndexScreen() {
       <Text style={styles.title}>Your App</Text>
       <Text style={styles.subtitle}>Start building from here.</Text>
 
-      <Link href="/HomeScreen" asChild>
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>HomeScreen</Text>
-        </Pressable>
-      </Link>
-
       <Link href="/ShippingAddressScreen" asChild>
         <Pressable style={styles.button}>
           <Text style={styles.buttonText}>Shipping Address</Text>
         </Pressable>
       </Link>
-
 
       <Link href="/login" asChild>
         <Pressable style={styles.button}>
@@ -38,7 +31,18 @@ export default function IndexScreen() {
           <Text style={styles.buttonText}>Add Product</Text>
         </Pressable>
       </Link>
-      
+
+      <Link href="/(tabs)/myOrders" asChild>
+        <Pressable style={styles.ordersButton}>
+          <Text style={styles.buttonText}>My Orders</Text>
+        </Pressable>
+      </Link>
+
+      <Link href="/(tabs)/profile" asChild>
+        <Pressable style={styles.profileButton}>
+          <Text style={styles.buttonText}>Profile</Text>
+        </Pressable>
+      </Link>
     </View>
   );
 }
@@ -70,6 +74,22 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
     backgroundColor: "#22C55E",
+    alignItems: "center",
+  },
+  ordersButton: {
+    width: "80%",
+    marginTop: 12,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#F97316",
+    alignItems: "center",
+  },
+  profileButton: {
+    width: "80%",
+    marginTop: 12,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#3B82F6",
     alignItems: "center",
   },
   buttonText: {

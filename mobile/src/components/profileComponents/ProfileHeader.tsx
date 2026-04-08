@@ -1,16 +1,16 @@
-// components/ProfileHeader.tsx
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-const ProfileHeader = ({ navigation }: any) => {
+type ProfileHeaderProps = {
+  onBackPress?: () => void;
+};
+
+const ProfileHeader = ({ onBackPress }: ProfileHeaderProps) => {
   return (
     <View style={styles.header}>
-      <TouchableOpacity
-        style={styles.backBtn}
-        onPress={() => navigation.goBack()}
-      >
-        <Icon name="chevron-back" size={22} color="#444" />
+      <TouchableOpacity style={styles.backBtn} onPress={onBackPress}>
+        <Ionicons name="chevron-back" size={22} color="#444" />
       </TouchableOpacity>
 
       <Text style={styles.title}>Profile</Text>
@@ -22,8 +22,8 @@ export default ProfileHeader;
 
 const styles = StyleSheet.create({
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
     paddingHorizontal: 6,
   },
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#222',
+    fontWeight: "700",
+    color: "#222",
   },
 });
