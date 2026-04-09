@@ -1,7 +1,7 @@
 // components/ProfileHeader.tsx
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 
 const ProfileHeader = ({ navigation }: any) => {
   return (
@@ -10,7 +10,7 @@ const ProfileHeader = ({ navigation }: any) => {
         style={styles.backBtn}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="chevron-back" size={22} color="#444" />
+        <Ionicons name="arrow-back" size={24} color="#1f2937" />
       </TouchableOpacity>
 
       <Text style={styles.title}>Profile</Text>

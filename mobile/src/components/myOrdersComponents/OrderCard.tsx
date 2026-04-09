@@ -1,4 +1,3 @@
-// components/OrderCard.tsx
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -76,7 +75,7 @@ const styles = StyleSheet.create({
   },
   rowBetween: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-between',    
   },
   rightSection: {
     flexDirection: 'row',

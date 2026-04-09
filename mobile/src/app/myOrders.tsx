@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { SafeAreaView, FlatList } from 'react-native';
-
-import OrdersHeader from '../../components/myOrdersComponents/OrdersHeader';
-import OrdersTabs from '../../components/myOrdersComponents/OrdersTabs';
-import OrderCard from '../../components/myOrdersComponents/OrderCard';
-
+import OrdersHeader from '../components/myOrdersComponents/OrdersHeader';
+import OrdersTabs from '../components/myOrdersComponents/OrdersTabs';
+import OrderCard from '../components/myOrdersComponents/OrderCard';
 type OrderStatus = 'Pending' | 'Delivered' | 'Cancelled';
 
 interface Order {

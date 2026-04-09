@@ -38,7 +38,16 @@ export default function IndexScreen() {
           <Text style={styles.buttonText}>Add Product</Text>
         </Pressable>
       </Link>
-      
+      <Link href="/profil" asChild>
+        <Pressable style={styles.button}>
+          <Text style={styles.buttonText}>Profile</Text>
+        </Pressable>
+      </Link>
+      <Link href="/myOrders" asChild>
+        <Pressable style={styles.button}>
+          <Text style={styles.buttonText}>My Orders</Text>
+        </Pressable>
+      </Link>
     </View>
   );
 }

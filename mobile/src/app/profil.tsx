@@ -1,9 +1,17 @@
 import React from 'react';
 import { View, SafeAreaView, StyleSheet } from 'react-native';
-import ProfileHeader from '../../components/profileComponents/ProfileHeader';
-import ProfileImage from '../../components/profileComponents/ProfileImage';
-import MenuItem from '../../components/profileComponents/MenuItem';
-
+import ProfileHeader from '../components/profileComponents/ProfileHeader';
+import ProfileImage from '../components/profileComponents/ProfileImage';
+import MenuItem from '../components/profileComponents/MenuItem';
+import { router } from 'expo-router';
+const onSubmit = () => {
+   try {
+     router.push('/myOrders'); 
+    
+}  catch (error) {
+     console.log(error);  
+}
+}
 const ProfileScreen = ({ navigation }: any) => {
   return (
     <SafeAreaView style={styles.container}>
@@ -13,7 +21,7 @@ const ProfileScreen = ({ navigation }: any) => {
       <ProfileImage />
 
       <View style={styles.menu}>
-        <MenuItem title="My Orders" icon="receipt-outline" />
+        <MenuItem onPress={onSubmit} title="My Orders" icon="receipt-outline" />
 
         <MenuItem title="Payment History" icon="card-outline"/>
 
