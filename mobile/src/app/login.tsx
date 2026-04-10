@@ -1,21 +1,21 @@
+import { router } from "expo-router";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import {
-  View,
-  StyleSheet,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
+  StyleSheet,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import LoginForm from "../components/auth/LoginForm";
-import { AUTH_COLORS } from "../constants/auth"
-import { validateLoginForm } from "../utils/authValidation";
-import { LoginErrors } from "../types/auth";
-import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../config/firebaseConfig";
+import { AUTH_COLORS } from "../constants/auth";
+import { LoginErrors } from "../types/auth";
+import { validateLoginForm } from "../utils/authValidation";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -53,7 +53,7 @@ export default function LoginScreen() {
       Alert.alert("Welcome", userData.fullName);
     }
 
-    router.replace("/HomeScreen");
+    router.replace("/home");
 
   } catch (error: any) {
     Alert.alert("Error", error?.message || "Login failed");
