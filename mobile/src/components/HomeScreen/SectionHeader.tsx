@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from "react-native";
 
 interface Props {
   title: string;
@@ -7,12 +7,15 @@ interface Props {
 }
 
 const SectionHeader = ({ title, actionText }: Props) => {
+  const { width } = useWindowDimensions();
+  const isSmallDevice = width < 375;
+
   return (
     <View style={styles.row}>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { fontSize: isSmallDevice ? 17 : 18 }]}>{title}</Text>
       {actionText ? (
         <TouchableOpacity>
-          <Text style={styles.action}>{actionText}</Text>
+          <Text style={[styles.action, { fontSize: isSmallDevice ? 14 : 16 }]}>{actionText}</Text>
         </TouchableOpacity>
       ) : null}
     </View>
@@ -29,12 +32,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 18,
     fontWeight: "700",
     color: "#111",
   },
   action: {
-    fontSize: 16,
     color: "#F97316",
     fontWeight: "600",
   },
