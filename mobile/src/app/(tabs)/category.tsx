@@ -2,11 +2,11 @@ import React from "react";
 import { View, FlatList, StyleSheet } from "react-native";
 import { router } from "expo-router";
 
-import CategoryHeader from "../components/Category/CategoryHeader";
-import CategoryAccordionItem from "../components/Category/CategoryAccordionItem";
-import BottomNavBar from "../components/navigation/BottomNavBar";
+import CategoryHeader from "../../components/Category/CategoryHeader";
+import CategoryAccordionItem from "../../components/Category/CategoryAccordionItem";
+import BottomNavBar from "../../components/navigation/BottomNavBar";
 
-import { categoryData } from "../constants/category";
+import { categoryData } from "../../constants/category";
 
 export default function CategoryScreen() {
   const [expandedId, setExpandedId] = React.useState<string>("2");
@@ -30,14 +30,7 @@ export default function CategoryScreen() {
         ListHeaderComponent={<CategoryHeader />}
       />
 
-      <BottomNavBar
-        activeTab="categories"
-        cartCount={3}
-        onHomePress={() => router.push("/")}
-        onCategoriesPress={() => router.push("/category")}
-        onCartPress={() => router.push("/")}
-        onAccountPress={() => router.push("/(tabs)/profile")}
-      />
+  
     </View>
   );
 }
