@@ -1,8 +1,20 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  useWindowDimensions,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
-const HomeHeader = () => {
+interface Props {
+  wishlistCount?: number;
+}
+
+const HomeHeader = ({ wishlistCount = 0 }: Props) => {
   const { width } = useWindowDimensions();
   const isSmallDevice = width < 375;
 
@@ -35,6 +47,7 @@ const HomeHeader = () => {
         </Text>
       </View>
 
+      {/* ❤️ زر الوش ليست */}
       <TouchableOpacity
         style={[
           styles.iconBtn,
@@ -44,18 +57,21 @@ const HomeHeader = () => {
             borderRadius: isSmallDevice ? 21 : 23,
           },
         ]}
+        onPress={() => router.push("/(tabs)/wishlist")}
       >
         <Ionicons name="heart-outline" size={22} color="#111" />
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>2</Text>
-        </View>
+
+        {wishlistCount > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{wishlistCount}</Text>
+          </View>
+        )}
       </TouchableOpacity>
     </View>
   );
 };
 
 export default HomeHeader;
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
