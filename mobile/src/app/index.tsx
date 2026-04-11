@@ -50,7 +50,6 @@ export default function IndexScreen() {
         </Link>
       </View>
 
-      {/* 🔥 البار تحت */}
       <BottomNavBar
         activeTab="home"
         cartCount={3}
