@@ -2,15 +2,15 @@ import React from "react";
 import { View, FlatList, StyleSheet } from "react-native";
 import { router } from "expo-router";
 
-import HomeHeader from "../components/HomeScreen/HomeHeader";
-import SearchSection from "../components/HomeScreen/SearchSection";
-import CategoriesRow from "../components/HomeScreen/CategoriesRow";
-import PromoBanner from "../components/HomeScreen/PromoBanner";
-import SectionHeader from "../components/HomeScreen/SectionHeader";
-import ProductCard from "../components/HomeScreen/ProductCard";
-import BottomNavBar from "../components/navigation/BottomNavBar";
+import HomeHeader from "../../components/HomeScreen/HomeHeader";
+import SearchSection from "../../components/HomeScreen/SearchSection";
+import CategoriesRow from "../../components/HomeScreen/CategoriesRow";
+import PromoBanner from "../../components/HomeScreen/PromoBanner";
+import SectionHeader from "../../components/HomeScreen/SectionHeader";
+import ProductCard from "../../components/HomeScreen/ProductCard";
+import BottomNavBar from "../../components/navigation/BottomNavBar";
 
-import { featuredProducts } from "../constants/home";
+import { featuredProducts } from "../../constants/home";
 
 export default function home() {
   return (

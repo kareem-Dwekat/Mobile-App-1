@@ -1,6 +1,4 @@
 import { router } from "expo-router";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import {
   Alert,
@@ -13,10 +11,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import SignupForm from "../components/auth/SignupForm";
-import { auth, db } from "../config/firebaseConfig";
 import { AUTH_COLORS } from "../constants/auth";
 import { SignupErrors } from "../types/auth";
 import { validateSignupForm } from "../utils/authValidation";
+import { signupUser } from "../services/auth.service";
 
 export default function SignupScreen() {
   const [fullName, setFullName] = useState("");
@@ -42,23 +40,10 @@ export default function SignupScreen() {
     try {
       setLoading(true);
 
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password
-      );
-
-      const user = userCredential.user;
-
-      await setDoc(doc(db, "users", user.uid), {
-        fullName,
-        email,
-        createdAt: new Date().toISOString(),
-      });
+      await signupUser(fullName, email, password);
 
       Alert.alert("Success", "Account created successfully");
       router.replace("/login");
-
     } catch (error: any) {
       console.log("ERROR:", error);
       Alert.alert("Error", error?.message || "Signup failed");

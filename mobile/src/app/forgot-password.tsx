@@ -9,12 +9,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { sendPasswordResetEmail } from "firebase/auth";
 
 import ForgotPasswordForm from "../components/auth/ForgotPasswordForm";
 import { AUTH_COLORS } from "../constants/auth";
 import { validateForgotPasswordEmail } from "../utils/authValidation";
-import { auth } from "../config/firebaseConfig";
+import { resetPassword } from "../services/auth.service";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
@@ -34,7 +33,7 @@ export default function ForgotPasswordScreen() {
     try {
       setLoading(true);
 
-      await sendPasswordResetEmail(auth, email.trim());
+      await resetPassword(email);
 
       Alert.alert("Success", "Password reset email sent");
       router.replace("/login");
@@ -46,7 +45,7 @@ export default function ForgotPasswordScreen() {
       } else if (err.code === "auth/too-many-requests") {
         Alert.alert("Error", "Too many attempts, try again later");
       } else {
-        Alert.alert("Error", "Something went wrong");
+        Alert.alert("Error", err?.message || "Something went wrong");
       }
     } finally {
       setLoading(false);

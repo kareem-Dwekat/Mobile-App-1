@@ -13,16 +13,16 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="index" options={{ title: "Home" }} />
-        <Stack.Screen name="login" options={{ title: "Login", headerShown: true }} />
-        <Stack.Screen name="payment" options={{ title: "Payment", headerShown: true }} />
-        <Stack.Screen name="add-product" options={{ title: "Add Product", headerShown: true }} />
+        <Stack.Screen name="login" options={{ title: "Login", headerShown: false }} />
+        <Stack.Screen name="payment" options={{ title: "Payment", headerShown: false }} />
+        <Stack.Screen name="add-product" options={{ title: "Add Product", headerShown: false }} />
         <Stack.Screen
           name="ShippingAddressScreen"
-          options={{ title: "Shipping Address", headerShown: true }}
+          options={{ title: "Shipping Address", headerShown: false }}
         />
         <Stack.Screen
           name="my-orders"
-          options={{ title: "My Orders", headerShown: true }}
+          options={{ title: "My Orders", headerShown: false }}
         />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
