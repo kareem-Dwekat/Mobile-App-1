@@ -35,7 +35,11 @@ export default function ForgotPasswordScreen() {
 
       await resetPassword(email);
 
-      Alert.alert("Success", "Password reset email sent");
+      Alert.alert(
+        "Success",
+        "Password reset email sent. Please check your email."
+      );
+
       router.replace("/login");
     } catch (err: any) {
       if (err.code === "auth/user-not-found") {
