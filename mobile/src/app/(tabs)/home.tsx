@@ -35,14 +35,7 @@ export default function home() {
         }
       />
 
-      <BottomNavBar
-        activeTab="home"
-        cartCount={3}
-        onHomePress={() => router.push("/")}
-        onCategoriesPress={() => router.push("/category")}
-        onCartPress={() => router.push("/")}
-        onAccountPress={() => router.push("/(tabs)/profile")}
-      />
+    
     </View>
   );
 }
