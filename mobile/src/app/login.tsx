@@ -1,6 +1,4 @@
 import { router } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import {
   Alert,
@@ -12,55 +10,36 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LoginForm from "../components/auth/LoginForm";
-import { auth, db } from "../config/firebaseConfig";
 import { AUTH_COLORS } from "../constants/auth";
 import { LoginErrors } from "../types/auth";
 import { validateLoginForm } from "../utils/authValidation";
+import { loginUser } from "../services/auth.service";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [errors, setErrors] = useState<LoginErrors>({});
 
   const handleLogin = async () => {
-  const validationErrors = validateLoginForm({
-    email,
-    password,
-  });
+    const validationErrors = validateLoginForm({ email, password });
+    setErrors(validationErrors);
 
-  setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
 
-  if (Object.keys(validationErrors).length > 0) return;
+    try {
+      setLoading(true);
 
-  try {
-    setLoading(true);
+      const result = await loginUser(email, password);
 
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email.trim(),
-      password
-    );
-
-    const userUid = userCredential.user.uid;
-
-    const userDoc = await getDoc(doc(db, "users", userUid));
-
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-
-      Alert.alert("Welcome", userData.fullName);
+      Alert.alert("Welcome", result.userData?.fullName || "User");
+      router.replace("/home");
+    } catch (error: any) {
+      Alert.alert("Error", error?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
-
-    router.replace("/home");
-
-  } catch (error: any) {
-    Alert.alert("Error", error?.message || "Login failed");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>

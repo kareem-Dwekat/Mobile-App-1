@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TextInput,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { AUTH_COLORS } from "../../constants/auth";
 import { LoginFormProps } from "../../types/auth";
@@ -23,6 +24,12 @@ export default function LoginForm({
 }: LoginFormProps) {
   return (
     <View style={styles.card}>
+      <Image
+        source={require("../../assets/images/logo.png")}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+
       <Text style={styles.title}>Welcome Back</Text>
       <Text style={styles.subtitle}>Login to continue</Text>
 
@@ -78,6 +85,12 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 1,
     borderColor: AUTH_COLORS.border,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    alignSelf: "center",
+    marginBottom: 10,
   },
   title: {
     fontSize: 24,

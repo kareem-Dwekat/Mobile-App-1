@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TextInput,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { AUTH_COLORS } from "../../constants/auth";
 import { ForgotPasswordFormProps } from "../../types/auth";
@@ -20,6 +21,12 @@ export default function ForgotPasswordForm({
 }: ForgotPasswordFormProps) {
   return (
     <View style={styles.card}>
+      <Image
+        source={require("../../assets/images/logo.png")}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+
       <Text style={styles.title}>Forgot Password</Text>
       <Text style={styles.subtitle}>
         Enter your email to reset your password
@@ -64,6 +71,12 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 1,
     borderColor: AUTH_COLORS.border,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    alignSelf: "center",
+    marginBottom: 15,
   },
   title: {
     fontSize: 24,
