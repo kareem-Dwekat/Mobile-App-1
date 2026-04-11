@@ -1,11 +1,11 @@
-
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/config/firebaseConfig";
+
 
 export const loginUser = async (email: string, password: string) => {
   const userCredential = await signInWithEmailAndPassword(
@@ -23,6 +23,7 @@ export const loginUser = async (email: string, password: string) => {
   };
 };
 
+
 export const signupUser = async (
   fullName: string,
   email: string,
@@ -34,15 +35,17 @@ export const signupUser = async (
     password
   );
 
-  const userUid = userCredential.user.uid;
+  const user = userCredential.user;
 
-  await setDoc(doc(db, "users", userUid), {
+  await setDoc(doc(db, "users", user.uid), {
     fullName,
     email: email.trim(),
+    createdAt: new Date().toISOString(),
   });
 
-  return userCredential.user;
+  return user;
 };
+
 
 export const resetPassword = async (email: string) => {
   await sendPasswordResetEmail(auth, email.trim());
