@@ -47,6 +47,7 @@ export const signupUser = async (
 };
 
 
+
 export const resetPassword = async (email: string) => {
   await sendPasswordResetEmail(auth, email.trim());
 };

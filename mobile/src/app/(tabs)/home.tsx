@@ -9,6 +9,8 @@ import SectionHeader from "../../components/HomeScreen/SectionHeader";
 import ProductCard from "../../components/HomeScreen/ProductCard";
 import FilterModal from "../../components/HomeScreen/FilterModal";
 import { featuredProducts } from "../../constants/home";
+import { initialWishlistData } from "../../constants/wishlist";
+
 const filterCategories = [
   "All",
   "Vehicles",
@@ -26,14 +28,16 @@ const filterCategories = [
   "Baby Items",
   "Pet Supplies",
 ];
+
 export default function Home() {
   const insets = useSafeAreaInsets();
 
   const [search, setSearch] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
-
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [maxPrice, setMaxPrice] = useState(5000);
+
+  const wishlistCount = initialWishlistData.length;
 
   const filteredProducts = useMemo(() => {
     return featuredProducts.filter((item) => {
@@ -73,7 +77,7 @@ export default function Home() {
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={
             <>
-              <HomeHeader />
+              <HomeHeader wishlistCount={wishlistCount} />
               <SearchSection
                 search={search}
                 onChangeSearch={setSearch}

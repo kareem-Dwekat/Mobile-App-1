@@ -24,6 +24,10 @@ export default function RootLayout() {
           name="my-orders"
           options={{ title: "My Orders", headerShown: false }}
         />
+         <Stack.Screen
+          name="wishlist"
+          options={{ title: "wishlist", headerShown: false }}
+        />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
 
