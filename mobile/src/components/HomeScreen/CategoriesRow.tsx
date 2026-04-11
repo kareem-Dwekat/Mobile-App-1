@@ -11,6 +11,7 @@ const CategoriesRow = () => {
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => <CategoryItem item={item} />}
       showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ paddingRight: 8 }}
     />
   );
 };

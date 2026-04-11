@@ -1,18 +1,50 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const HomeHeader = () => {
+  const { width } = useWindowDimensions();
+  const isSmallDevice = width < 375;
+
   return (
     <View style={styles.container}>
       <View style={styles.left}>
         <View style={styles.logoBox}>
-          <Text style={styles.logoMark}>⬡</Text>
+          <Image
+            source={require("@/assets/images/logo.png")}
+            style={[
+              styles.logo,
+              {
+                width: isSmallDevice ? 42 : 50,
+                height: isSmallDevice ? 42 : 50,
+              },
+            ]}
+          />
         </View>
-        <Text style={styles.title}>Elevate</Text>
+
+        <Text
+          style={[
+            styles.title,
+            {
+              fontSize: isSmallDevice ? 20 : 22,
+            },
+          ]}
+          numberOfLines={1}
+        >
+          QuickMart
+        </Text>
       </View>
 
-      <TouchableOpacity style={styles.iconBtn}>
+      <TouchableOpacity
+        style={[
+          styles.iconBtn,
+          {
+            width: isSmallDevice ? 42 : 46,
+            height: isSmallDevice ? 42 : 46,
+            borderRadius: isSmallDevice ? 21 : 23,
+          },
+        ]}
+      >
         <Ionicons name="heart-outline" size={22} color="#111" />
         <View style={styles.badge}>
           <Text style={styles.badgeText}>2</Text>
@@ -34,23 +66,21 @@ const styles = StyleSheet.create({
   left: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
+    paddingRight: 10,
   },
   logoBox: {
     marginRight: 8,
   },
-  logoMark: {
-    fontSize: 22,
-    color: "#5B6CFF",
+  logo: {
+    resizeMode: "contain",
   },
   title: {
-    fontSize: 22,
     fontWeight: "700",
     color: "#111",
+    flexShrink: 1,
   },
   iconBtn: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
     borderWidth: 1,
     borderColor: "#E7E7E7",
     alignItems: "center",
@@ -68,6 +98,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 3,
   },
   badgeText: {
     color: "#fff",

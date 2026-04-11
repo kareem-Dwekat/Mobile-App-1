@@ -10,7 +10,7 @@ const ProfileHeader = ({ onBackPress }: ProfileHeaderProps) => {
   return (
     <View style={styles.header}>
       <TouchableOpacity style={styles.backBtn} onPress={onBackPress}>
-        <Ionicons name="chevron-back" size={22} color="#444" />
+       
       </TouchableOpacity>
 
       <Text style={styles.title}>Profile</Text>

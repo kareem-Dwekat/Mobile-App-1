@@ -12,4 +12,8 @@ export interface CategoryItemType {
     oldPrice?: number;
     rating: number;
     reviews: number;
+    category?: string;
+    location?: string;
+    condition?: string;
+    createdAt?: string;
   }

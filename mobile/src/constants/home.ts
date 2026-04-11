@@ -1,13 +1,17 @@
 import { CategoryItemType, ProductItemType } from "../types/home";
 
 export const homeCategories: CategoryItemType[] = [
-  { id: "1", name: "Men's", icon: "shirt-outline" },
-  { id: "2", name: "Women'", icon: "woman-outline" },
-  { id: "3", name: "Kids'", icon: "gift-outline" },
-  { id: "4", name: "Seasons", icon: "bag-handle-outline" },
-  { id: "5", name: "More", icon: "ellipsis-horizontal" },
-];
+  { id: "1", name: "Vehicles", icon: "car-sport-outline" },
+  { id: "2", name: "Phones", icon: "phone-portrait-outline" },
+  { id: "3", name: "Electronics", icon: "desktop-outline" },
+  { id: "4", name: "Furniture", icon: "bed-outline" },
+  { id: "5", name: "Clothing", icon: "shirt-outline" },
+  { id: "6", name: "Shoes", icon: "walk-outline" },
+  { id: "7", name: "Books", icon: "book-outline" },
+  { id: "8", name: "Gaming", icon: "game-controller-outline" },
+  { id: "9", name: "Home", icon: "home-outline" },
 
+];
 export const featuredProducts: ProductItemType[] = [
   {
     id: "1",

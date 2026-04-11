@@ -1,20 +1,46 @@
 import React from "react";
-import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  useWindowDimensions,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const SearchSection = () => {
+interface Props {
+  search: string;
+  onChangeSearch: (text: string) => void;
+  onFilterPress: () => void;
+}
+
+const SearchSection = ({ search, onChangeSearch, onFilterPress }: Props) => {
+  const { width } = useWindowDimensions();
+  const isSmallDevice = width < 375;
+
   return (
     <View style={styles.row}>
-      <View style={styles.searchBox}>
+      <View style={[styles.searchBox, { height: isSmallDevice ? 48 : 52 }]}>
         <Ionicons name="search-outline" size={22} color="#777" />
         <TextInput
           placeholder="Search"
           placeholderTextColor="#999"
-          style={styles.input}
+          value={search}
+          onChangeText={onChangeSearch}
+          style={[styles.input, { fontSize: isSmallDevice ? 14 : 16 }]}
         />
       </View>
 
-      <TouchableOpacity style={styles.filterBtn}>
+      <TouchableOpacity
+        onPress={onFilterPress}
+        style={[
+          styles.filterBtn,
+          {
+            width: isSmallDevice ? 48 : 52,
+            height: isSmallDevice ? 48 : 52,
+          },
+        ]}
+      >
         <Ionicons name="options-outline" size={22} color="#111" />
       </TouchableOpacity>
     </View>
@@ -26,12 +52,11 @@ export default SearchSection;
 const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
-    gap: 12,
     marginBottom: 22,
+    alignItems: "center",
   },
   searchBox: {
     flex: 1,
-    height: 52,
     borderWidth: 1,
     borderColor: "#E5E5E5",
     borderRadius: 14,
@@ -39,16 +64,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 14,
     backgroundColor: "#fff",
+    marginRight: 12,
   },
   input: {
     flex: 1,
     marginLeft: 10,
-    fontSize: 16,
     color: "#111",
   },
   filterBtn: {
-    width: 52,
-    height: 52,
     borderRadius: 14,
     borderWidth: 1,
     borderColor: "#E5E5E5",
