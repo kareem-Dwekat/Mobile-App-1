@@ -76,11 +76,11 @@ const OrderCard = ({ item, isExpanded, onPress }: OrderCardProps) => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.trackBtn}
-              onPress={handleTrackPress}
-            >
-              <Text style={styles.btnText}>Track Order</Text>
-            </TouchableOpacity>
+  style={styles.trackBtn}
+  onPress={() => router.push("/track-order")}
+>
+  <Text style={styles.btnText}>Track Order</Text>
+</TouchableOpacity>
           </View>
         </>
       )}
