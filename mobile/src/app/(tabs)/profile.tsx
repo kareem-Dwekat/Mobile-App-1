@@ -1,6 +1,8 @@
 import React from "react";
-import { View, SafeAreaView, StyleSheet, Alert } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { View, StyleSheet, Alert } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
+
 import ProfileHeader from "../../components/profileComponents/ProfileHeader";
 import ProfileImage from "../../components/profileComponents/ProfileImage";
 import MenuItem from "../../components/profileComponents/MenuItem";
@@ -15,27 +17,54 @@ const PROFILE_MENU_ITEMS = [
 ];
 
 const ProfileScreen = () => {
-  const navigation = useNavigation();
-
   const handleMenuPress = (title: string) => {
-    Alert.alert(title);
+    switch (title) {
+      case "My Orders":
+        router.push("../myOrders");
+        break;
+
+      case "Wish List":
+        router.push("/(tabs)/wishlist");
+        break;
+
+      case "Shipping Address":
+        router.push("/ShippingAddressScreen");
+        break;
+
+      case "Payment History":
+        Alert.alert("Payment History");
+        break;
+
+      case "Your Profile":
+        Alert.alert("Profile Info");
+        break;
+
+      case "Logout":
+        Alert.alert("Logout");
+        break;
+
+      default:
+        Alert.alert(title);
+    }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ProfileHeader onBackPress={() => navigation.goBack()} />
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <View style={styles.container}>
+        <ProfileHeader onBackPress={() => router.back()} />
 
-      <ProfileImage onEditPress={() => Alert.alert("Edit Profile Image")} />
+        <ProfileImage onEditPress={() => Alert.alert("Edit Profile Image")} />
 
-      <View style={styles.menu}>
-        {PROFILE_MENU_ITEMS.map((item) => (
-          <MenuItem
-            key={item.title}
-            title={item.title}
-            icon={item.icon}
-            onPress={() => handleMenuPress(item.title)}
-          />
-        ))}
+        <View style={styles.menu}>
+          {PROFILE_MENU_ITEMS.map((item) => (
+            <MenuItem
+              key={item.title}
+              title={item.title}
+              icon={item.icon}
+              onPress={() => handleMenuPress(item.title)}
+            />
+          ))}
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -44,11 +73,14 @@ const ProfileScreen = () => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  container: {
+    flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 10,
   },
   menu: {
     flex: 1,

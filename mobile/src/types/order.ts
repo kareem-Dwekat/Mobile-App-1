@@ -1,6 +1,6 @@
 export type OrderStatus = "Pending" | "Delivered" | "Cancelled";
 
-export interface Order {
+export interface OrderItemType {
   id: string;
   date: string;
   items: number;
@@ -8,14 +8,8 @@ export interface Order {
   status: OrderStatus;
 }
 
-export type FilterTab =
-  | "All Orders"
-  | "Pending Orders"
-  | "Completed Orders"
-  | "Cancelled Orders";
-
-export interface TabConfig {
-  key: FilterTab;
+export interface OrdersTabType {
+  key: string;
   label: string;
   count: number;
 }
@@ -25,13 +19,13 @@ export interface OrdersHeaderProps {
 }
 
 export interface OrdersTabsProps {
-  tabs: TabConfig[];
-  activeTab: FilterTab;
-  setActiveTab: (tab: FilterTab) => void;
+  tabs: OrdersTabType[];
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
 }
 
 export interface OrderCardProps {
-  item: Order;
+  item: OrderItemType;
   isExpanded: boolean;
   onPress: () => void;
 }
