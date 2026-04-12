@@ -47,7 +47,7 @@ const HomeHeader = ({ wishlistCount = 0 }: Props) => {
         </Text>
       </View>
 
-      {/* ❤️ زر الوش ليست */}
+  
       <TouchableOpacity
         style={[
           styles.iconBtn,
