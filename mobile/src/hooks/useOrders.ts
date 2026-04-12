@@ -1,30 +1,58 @@
-import { useMemo, useState } from "react";
-import { ordersData } from "../constants/orders";
-import { FilterTab } from "../types/order";
+import { useEffect, useMemo, useState } from "react";
+import { getOrders } from "../services/orders.service";
+import { OrderItemType, OrdersTabType } from "../types/order";
 
 export const useOrders = () => {
-  const [activeTab, setActiveTab] = useState<FilterTab>("All Orders");
-  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  const [orders, setOrders] = useState<OrderItemType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("All");
+  const [expandedOrderId, setExpandedOrderId] = useState<string>("");
+
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        setLoading(true);
+        const data = await getOrders();
+        setOrders(data);
+      } catch (error) {
+        console.log("Failed to load orders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadOrders();
+  }, []);
+
+  const tabs: OrdersTabType[] = useMemo(() => {
+    const pendingCount = orders.filter((o) => o.status === "Pending").length;
+    const deliveredCount = orders.filter((o) => o.status === "Delivered").length;
+    const cancelledCount = orders.filter((o) => o.status === "Cancelled").length;
+
+    return [
+      { key: "All", label: "All", count: orders.length },
+      { key: "Pending", label: "Pending", count: pendingCount },
+      { key: "Delivered", label: "Delivered", count: deliveredCount },
+      { key: "Cancelled", label: "Cancelled", count: cancelledCount },
+    ];
+  }, [orders]);
 
   const filteredOrders = useMemo(() => {
-    return ordersData.filter((order) => {
-      if (activeTab === "All Orders") return true;
-      if (activeTab === "Pending Orders") return order.status === "Pending";
-      if (activeTab === "Completed Orders") return order.status === "Delivered";
-      if (activeTab === "Cancelled Orders") return order.status === "Cancelled";
-      return false;
-    });
-  }, [activeTab]);
+    if (activeTab === "All") return orders;
+    return orders.filter((order) => order.status === activeTab);
+  }, [orders, activeTab]);
 
   const toggleExpandedOrder = (id: string) => {
-    setExpandedOrderId((prev) => (prev === id ? null : id));
+    setExpandedOrderId((prev) => (prev === id ? "" : id));
   };
 
   return {
+    loading,
     activeTab,
     setActiveTab,
     expandedOrderId,
     filteredOrders,
     toggleExpandedOrder,
+    tabs,
   };
 };

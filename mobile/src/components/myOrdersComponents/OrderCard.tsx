@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { OrderCardProps } from "../../types/order";
 
 const OrderCard = ({ item, isExpanded, onPress }: OrderCardProps) => {
@@ -15,6 +16,25 @@ const OrderCard = ({ item, isExpanded, onPress }: OrderCardProps) => {
       default:
         return {};
     }
+  };
+
+  const handleReviewPress = () => {
+    router.push({
+      pathname: "/review-order",
+      params: {
+        id: item.id,
+        title: `Order #${item.id}`,
+        description:
+          "This flowing satin maxi dress radiates timeless elegance with its silky texture and subtle shimmer. Designed with a flattering waistline and open-back detail, it's ideal for evening events, date nights, or special celebrations.",
+        price: String(item.amount),
+        image:
+          "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop",
+      },
+    });
+  };
+
+  const handleTrackPress = () => {
+    console.log("Track Order:", item.id);
   };
 
   return (
@@ -42,17 +62,23 @@ const OrderCard = ({ item, isExpanded, onPress }: OrderCardProps) => {
 
       {isExpanded && (
         <>
-          <View style={styles.rowBetween}>
+          <View style={styles.rowBetweenExpanded}>
             <Text>Order Amount</Text>
             <Text>${item.amount}</Text>
           </View>
 
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.reviewBtn}>
+            <TouchableOpacity
+              style={styles.reviewBtn}
+              onPress={handleReviewPress}
+            >
               <Text style={styles.btnText}>Order Review</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.trackBtn}>
+            <TouchableOpacity
+              style={styles.trackBtn}
+              onPress={handleTrackPress}
+            >
               <Text style={styles.btnText}>Track Order</Text>
             </TouchableOpacity>
           </View>
@@ -76,6 +102,13 @@ const styles = StyleSheet.create({
   rowBetween: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+  },
+  rowBetweenExpanded: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 12,
   },
   rightSection: {
     flexDirection: "row",
@@ -91,6 +124,7 @@ const styles = StyleSheet.create({
   status: {
     paddingHorizontal: 10,
     borderRadius: 10,
+    overflow: "hidden",
   },
   pending: {
     backgroundColor: "#e6ebff",
@@ -110,13 +144,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#1c5ed6",
     padding: 10,
     borderRadius: 8,
+    flex: 1,
+    marginRight: 6,
+    alignItems: "center",
   },
   trackBtn: {
     backgroundColor: "#ff6b00",
     padding: 10,
     borderRadius: 8,
+    flex: 1,
+    marginLeft: 6,
+    alignItems: "center",
   },
   btnText: {
     color: "#fff",
+    fontWeight: "600",
   },
 });

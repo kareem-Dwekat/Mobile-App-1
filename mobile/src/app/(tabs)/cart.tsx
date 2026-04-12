@@ -60,42 +60,50 @@ export default function CartScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>My Cart</Text>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <View style={styles.container}>
+        <Text style={styles.header}>My Cart</Text>
 
-      <FlatList
-        data={cartItems}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>Your cart is empty</Text>
-        }
-      />
+        <FlatList
+          data={cartItems}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>Your cart is empty</Text>
+          }
+        />
 
-      <View style={styles.bottomBar}>
-        <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total ({totalItems} items):</Text>
-          <Text style={styles.totalPrice}>${totalPrice.toFixed(2)}</Text>
+        <View style={styles.bottomBar}>
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>Total ({totalItems} items):</Text>
+            <Text style={styles.totalPrice}>${totalPrice.toFixed(2)}</Text>
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.paymentBtn,
+              cartItems.length === 0 && styles.paymentBtnDisabled,
+            ]}
+            onPress={() => router.push("/payment")}
+            disabled={cartItems.length === 0}
+          >
+            <Text style={styles.paymentText}>Proceed To Payment</Text>
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity
-          style={styles.paymentBtn}
-          onPress={() => router.push("/payment")}
-          disabled={cartItems.length === 0}
-        >
-          <Text style={styles.paymentText}>Proceed To Payment</Text>
-        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: "#F8F8F8",
+  },
+  container: {
+    flex: 1,
   },
   header: {
     fontSize: 22,
@@ -202,6 +210,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#F97316",
     alignItems: "center",
     justifyContent: "center",
+  },
+  paymentBtnDisabled: {
+    opacity: 0.5,
   },
   paymentText: {
     color: "#fff",

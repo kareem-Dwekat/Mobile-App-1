@@ -37,6 +37,10 @@ export default function RootLayout() {
               name="my-orders"
               options={{ title: "My Orders", headerShown: false }}
             />
+            <Stack.Screen
+              name="review-order"
+              options={{ title: "Review Order", headerShown: false }}
+            />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           </Stack>
 

@@ -1,29 +1,32 @@
-import { Order, TabConfig } from "../types/order";
+import { OrderItemType } from "../types/order";
 
-export const ordersData: Order[] = [
-  { id: "0050", date: "07 Feb 2026", items: 1, amount: 120, status: "Delivered" },
-  { id: "0051", date: "07 Feb 2026", items: 1, amount: 627.98, status: "Pending" },
-  { id: "0052", date: "07 Feb 2026", items: 1, amount: 90, status: "Pending" },
-  { id: "0053", date: "07 Feb 2026", items: 1, amount: 150, status: "Pending" },
-  { id: "0054", date: "07 Feb 2026", items: 2, amount: 300, status: "Pending" },
-  { id: "0055", date: "07 Feb 2026", items: 1, amount: 80, status: "Cancelled" },
-];
-
-export const ordersTabs: TabConfig[] = [
-  { key: "All Orders", label: "All", count: ordersData.length },
+export const initialOrders: OrderItemType[] = [
   {
-    key: "Pending Orders",
-    label: "Pending",
-    count: ordersData.filter((o) => o.status === "Pending").length,
+    id: "1001",
+    date: "2026-04-01",
+    items: 2,
+    amount: 120,
+    status: "Pending",
   },
   {
-    key: "Completed Orders",
-    label: "Complete",
-    count: ordersData.filter((o) => o.status === "Delivered").length,
+    id: "1002",
+    date: "2026-03-28",
+    items: 1,
+    amount: 80,
+    status: "Delivered",
   },
   {
-    key: "Cancelled Orders",
-    label: "Cancel",
-    count: ordersData.filter((o) => o.status === "Cancelled").length,
+    id: "1003",
+    date: "2026-03-20",
+    items: 3,
+    amount: 230,
+    status: "Cancelled",
+  },
+  {
+    id: "1004",
+    date: "2026-03-15",
+    items: 4,
+    amount: 310,
+    status: "Pending",
   },
 ];
