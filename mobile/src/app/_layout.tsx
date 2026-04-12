@@ -34,7 +34,7 @@ export default function RootLayout() {
               options={{ title: "Shipping Address", headerShown: false }}
             />
             <Stack.Screen
-              name="my-orders"
+              name="myOrders"
               options={{ title: "My Orders", headerShown: false }}
             />
             <Stack.Screen
@@ -48,6 +48,10 @@ export default function RootLayout() {
              <Stack.Screen
               name="payment-history"
               options={{ title: "Payment History", headerShown: false }}
+            />
+              <Stack.Screen
+              name="invoice"
+              options={{ title: "invoice", headerShown: false }}
             />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           </Stack>
