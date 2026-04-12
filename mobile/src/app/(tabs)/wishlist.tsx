@@ -8,11 +8,15 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+
 import { initialWishlistData } from "../../constants/wishlist";
 import { WishlistItemType } from "../../types/wishlist";
+import { useCart } from "../../hooks/CartContext";
 
 export default function Wishlist() {
   const [items, setItems] = useState<WishlistItemType[]>(initialWishlistData);
+  const { addToCart } = useCart();
 
   const toggleSelect = (id: string) => {
     setItems((prev) =>
@@ -35,7 +39,7 @@ export default function Wishlist() {
   };
 
   const toggleSelectAll = () => {
-    const allSelected = items.every((item) => item.selected);
+    const allSelected = items.length > 0 && items.every((item) => item.selected);
     setItems((prev) =>
       prev.map((item) => ({ ...item, selected: !allSelected }))
     );
@@ -43,6 +47,27 @@ export default function Wishlist() {
 
   const handleDeleteSelected = () => {
     setItems((prev) => prev.filter((item) => !item.selected));
+  };
+
+  const handleAddToCart = () => {
+    const selectedItems = items
+      .filter((item) => item.selected)
+      .map((item) => ({
+        id: item.id,
+        title: item.title,
+        category: item.category,
+        price: item.price,
+        image: item.image,
+        qty: item.qty,
+      }));
+
+    if (selectedItems.length === 0) return;
+
+    addToCart(selectedItems);
+
+    setItems((prev) => prev.filter((item) => !item.selected));
+
+    router.push("/(tabs)/cart");
   };
 
   const renderItem = ({ item }: { item: WishlistItemType }) => (
@@ -104,7 +129,7 @@ export default function Wishlist() {
         </TouchableOpacity>
 
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.cartBtn}>
+          <TouchableOpacity style={styles.cartBtn} onPress={handleAddToCart}>
             <Text style={styles.cartText}>Add to Cart</Text>
           </TouchableOpacity>
 

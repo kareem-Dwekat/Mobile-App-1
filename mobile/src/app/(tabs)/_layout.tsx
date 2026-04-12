@@ -23,7 +23,7 @@ export default function TabsLayout() {
   cartCount={3}
   onHomePress={() => router.push("/(tabs)/home")}
   onCategoriesPress={() => router.push("/category")}
-  onCartPress={() => router.push("/(tabs)/myOrders")}
+  onCartPress={() => router.push("/(tabs)/cart")}
   onAccountPress={() => router.push("/(tabs)/profile")}
 />
     </View>
