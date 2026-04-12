@@ -32,7 +32,7 @@ const ProfileScreen = () => {
         break;
 
       case "Payment History":
-        Alert.alert("Payment History");
+        router.push("/payment-history");
         break;
 
       case "Your Profile":

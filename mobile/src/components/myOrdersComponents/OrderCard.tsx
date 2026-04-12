@@ -33,9 +33,7 @@ const OrderCard = ({ item, isExpanded, onPress }: OrderCardProps) => {
     });
   };
 
-  const handleTrackPress = () => {
-    console.log("Track Order:", item.id);
-  };
+ 
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
@@ -161,3 +159,5 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
+
+

@@ -45,6 +45,10 @@ export default function RootLayout() {
               name="track-order"
               options={{ title: "Track Order", headerShown: false }}
             />
+             <Stack.Screen
+              name="payment-history"
+              options={{ title: "Payment History", headerShown: false }}
+            />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           </Stack>
 
