@@ -71,6 +71,7 @@ const ReviewForm = ({
         textAlignVertical="top"
         style={styles.textArea}
         placeholder="Write your review here..."
+        placeholderTextColor="#9CA3AF"
       />
 
       <Text style={styles.reviewLabel}>Attached Photos</Text>
@@ -103,6 +104,7 @@ const styles = StyleSheet.create({
   },
   productRow: {
     flexDirection: "row",
+    alignItems: "flex-start",
     marginBottom: 20,
   },
   image: {
@@ -123,7 +125,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    lineHeight: 24,
+    lineHeight: 28,
     color: "#6B7280",
     marginBottom: 14,
   },
@@ -148,6 +150,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginBottom: 8,
+    flexWrap: "wrap",
   },
   star: {
     marginHorizontal: 6,
@@ -182,6 +185,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 16,
+    marginBottom: 10,
   },
   cancelBtn: {
     flex: 1,

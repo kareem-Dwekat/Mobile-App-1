@@ -41,6 +41,10 @@ export default function RootLayout() {
               name="review-order"
               options={{ title: "Review Order", headerShown: false }}
             />
+            <Stack.Screen
+              name="track-order"
+              options={{ title: "Track Order", headerShown: false }}
+            />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           </Stack>
 
