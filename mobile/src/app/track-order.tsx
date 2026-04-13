@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import MapView, { Marker } from "react-native-maps";
+
 
 export default function TrackOrderScreen() {
   const deliveryLocation = {
@@ -38,19 +38,6 @@ export default function TrackOrderScreen() {
 
         <Text style={styles.sectionTitle}>Delivery Location</Text>
 
-        <View style={styles.mapContainer}>
-          <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: deliveryLocation.latitude,
-              longitude: deliveryLocation.longitude,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}
-          >
-            <Marker coordinate={deliveryLocation} title="Delivery Location" />
-          </MapView>
-        </View>
 
         <View style={styles.infoCard}>
           <View style={styles.row}>
