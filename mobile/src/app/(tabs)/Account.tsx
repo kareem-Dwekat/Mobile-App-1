@@ -14,6 +14,7 @@ const PROFILE_MENU_ITEMS = [
   { title: "Wish List", icon: "heart-outline" },
   { title: "Shipping Address", icon: "location-outline" },
   { title: "Your Profile", icon: "person-outline" },
+  { title: "Add Product", icon: "add-circle-outline" }, // 👈 تمت الإضافة
   { title: "Logout", icon: "log-out-outline" },
 ];
 
@@ -21,7 +22,7 @@ const ProfileScreen = () => {
   const handleMenuPress = (title: string) => {
     switch (title) {
       case "My Orders":
-        router.push("../myOrders");
+        router.push("/myOrders");
         break;
 
       case "Wish List":
@@ -37,34 +38,38 @@ const ProfileScreen = () => {
         break;
 
       case "Your Profile":
-        Alert.alert("Profile Info");
+        router.push("/profile");
         break;
 
-        case "Logout":
-          Alert.alert(
-            "Confirm Logout", // العنوان
-            "Are you sure you want to logout?", // الرسالة
-            [
-              {
-                text: "Cancel",
-                style: "cancel",
+      case "Add Product":
+        router.push("/add-product");
+        break;
+
+      case "Logout":
+        Alert.alert(
+          "Confirm Logout",
+          "Are you sure you want to logout?",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+            {
+              text: "Yes, Logout",
+              style: "destructive",
+              onPress: async () => {
+                try {
+                  await logoutUser();
+                  router.replace("/login");
+                } catch (error) {
+                  Alert.alert("Error", "Logout failed");
+                }
               },
-              {
-                text: "Yes, Logout",
-                style: "destructive",
-                onPress: async () => {
-                  try {
-                    await logoutUser();
-                    router.replace("/login");
-                  } catch (error) {
-                    Alert.alert("Error", "Logout failed");
-                  }
-                },
-              },
-            ],
-            { cancelable: true }
-          );
-          break;
+            },
+          ],
+          { cancelable: true }
+        );
+        break;
 
       default:
         Alert.alert(title);

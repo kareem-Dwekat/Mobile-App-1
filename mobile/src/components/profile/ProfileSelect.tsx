@@ -1,0 +1,68 @@
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { COLORS } from "@/constants/Profile";
+
+interface Option {
+  label: string;
+  value: string;
+}
+
+interface Props {
+  label: string;
+  selectedValue: string;
+  onValueChange: (value: string) => void;
+  items: Option[];
+}
+
+export default function ProfileSelect({
+  label,
+  selectedValue,
+  onValueChange,
+  items,
+}: Props) {
+  return (
+    <View style={styles.wrapper}>
+      <Text style={styles.label}>{label}</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={selectedValue}
+          onValueChange={onValueChange}
+          style={styles.picker}
+        >
+          {items.map((item) => (
+            <Picker.Item
+              key={item.value}
+              label={item.label}
+              value={item.value}
+            />
+          ))}
+        </Picker>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: 18,
+  },
+  label: {
+    fontSize: 15,
+    color: COLORS.text,
+    marginBottom: 8,
+    fontWeight: "500",
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 14,
+    overflow: "hidden",
+    backgroundColor: COLORS.background,
+    justifyContent: "center",
+  },
+  picker: {
+    height: 56,
+    color: COLORS.text,
+  },
+});

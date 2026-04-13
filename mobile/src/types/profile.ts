@@ -1,31 +1,10 @@
-export type MenuIconName =
-  | "receipt-outline"
-  | "card-outline"
-  | "heart-outline"
-  | "location-outline"
-  | "person-outline"
-  | "log-out-outline"
-  | "chevron-forward"
-  | "chevron-back"
-  | "pencil";
-
-export interface MenuItemData {
-  title: string;
-  icon: MenuIconName;
-  onPress?: () => void;
-}
-
-export interface MenuItemProps {
-  title: string;
-  icon: MenuIconName;
-  onPress?: () => void;
-}
-
-export interface ProfileHeaderProps {
-  onBackPress: () => void;
-}
-
-export interface ProfileImageProps {
-  imageUri?: string;
-  onEditPress?: () => void;
+export interface ProfileFormData {
+  email: string;
+  password: string;
+  zipCode: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  accountHolderName: string;
 }
