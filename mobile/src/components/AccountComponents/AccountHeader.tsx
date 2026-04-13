@@ -13,7 +13,7 @@ const ProfileHeader = ({ onBackPress }: ProfileHeaderProps) => {
        
       </TouchableOpacity>
 
-      <Text style={styles.title}>Profile</Text>
+      <Text style={styles.title}>Account</Text>
     </View>
   );
 };

@@ -24,7 +24,7 @@ export default function TabsLayout() {
   onHomePress={() => router.push("/(tabs)/home")}
   onCategoriesPress={() => router.push("/category")}
   onCartPress={() => router.push("/(tabs)/cart")}
-  onAccountPress={() => router.push("/(tabs)/profile")}
+  onAccountPress={() => router.push("/(tabs)/Account")}
 />
     </View>
   );

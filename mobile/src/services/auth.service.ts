@@ -2,10 +2,10 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signOut,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/config/firebaseConfig";
-
 
 export const loginUser = async (email: string, password: string) => {
   const userCredential = await signInWithEmailAndPassword(
@@ -22,7 +22,6 @@ export const loginUser = async (email: string, password: string) => {
     userData: userDoc.exists() ? userDoc.data() : null,
   };
 };
-
 
 export const signupUser = async (
   fullName: string,
@@ -46,8 +45,11 @@ export const signupUser = async (
   return user;
 };
 
-
-
 export const resetPassword = async (email: string) => {
   await sendPasswordResetEmail(auth, email.trim());
+};
+
+
+export const logoutUser = async () => {
+  await signOut(auth);
 };
