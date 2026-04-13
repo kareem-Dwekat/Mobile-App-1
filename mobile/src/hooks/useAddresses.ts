@@ -6,21 +6,32 @@ export const useAddresses = () => {
   const [addresses, setAddresses] = useState<Address[]>(MOCK_ADDRESSES);
 
   const setActiveAddress = (id: string) => {
-    const updated = addresses.map((item) => ({
-      ...item,
-      isActive: item.id === id,
-    }));
-    setAddresses(updated);
+    setAddresses((prev) =>
+      prev.map((item) => ({
+        ...item,
+        isActive: item.id === id,
+      }))
+    );
   };
 
   const deleteAddress = (id: string) => {
-    const updated = addresses.filter((item) => item.id !== id);
-    setAddresses(updated);
+    setAddresses((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const addAddress = (newAddress: Omit<Address, "id" | "isActive">) => {
+    const address: Address = {
+      id: Date.now().toString(),
+      ...newAddress,
+      isActive: false,
+    };
+
+    setAddresses((prev) => [address, ...prev]);
   };
 
   return {
     addresses,
     setActiveAddress,
     deleteAddress,
+    addAddress,
   };
 };

@@ -1,10 +1,10 @@
 export type Address = {
-    id: string;
-    title: string;
-    street: string;
-    city: string;
-    state: string;
-    country: string;
-    zipCode: string;
-    isActive: boolean;
-  };
+  id: string;
+  title: string;
+  country: string;
+  city: string;
+  addressLine1: string;
+  addressLine2?: string;
+  zipCode: string;
+  isActive: boolean;
+};

@@ -3,9 +3,10 @@ import { View, StyleSheet, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
-import ProfileHeader from "../../components/profileComponents/ProfileHeader";
-import ProfileImage from "../../components/profileComponents/ProfileImage";
-import MenuItem from "../../components/profileComponents/MenuItem";
+import ProfileHeader from "../../components/AccountComponents/AccountHeader";
+import ProfileImage from "../../components/AccountComponents/AccountImage";
+import MenuItem from "../../components/AccountComponents/MenuItem";
+import { logoutUser } from "@/services/auth.service";
 
 const PROFILE_MENU_ITEMS = [
   { title: "My Orders", icon: "receipt-outline" },
@@ -39,9 +40,31 @@ const ProfileScreen = () => {
         Alert.alert("Profile Info");
         break;
 
-      case "Logout":
-        Alert.alert("Logout");
-        break;
+        case "Logout":
+          Alert.alert(
+            "Confirm Logout", // العنوان
+            "Are you sure you want to logout?", // الرسالة
+            [
+              {
+                text: "Cancel",
+                style: "cancel",
+              },
+              {
+                text: "Yes, Logout",
+                style: "destructive",
+                onPress: async () => {
+                  try {
+                    await logoutUser();
+                    router.replace("/login");
+                  } catch (error) {
+                    Alert.alert("Error", "Logout failed");
+                  }
+                },
+              },
+            ],
+            { cancelable: true }
+          );
+          break;
 
       default:
         Alert.alert(title);
