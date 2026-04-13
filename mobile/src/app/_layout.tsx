@@ -28,6 +28,7 @@ export default function RootLayout() {
               <Stack.Screen name="track-order" options={{ headerShown: false }} />
               <Stack.Screen name="payment-history" options={{ headerShown: false }} />
               <Stack.Screen name="invoice" options={{ headerShown: false }} />
+              <Stack.Screen name="profile" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             </Stack>
 
