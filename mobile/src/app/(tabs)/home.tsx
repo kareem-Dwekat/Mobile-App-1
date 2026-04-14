@@ -1,33 +1,23 @@
 import React, { useMemo, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import HomeHeader from "../../components/HomeScreen/HomeHeader";
-import SearchSection from "../../components/HomeScreen/SearchSection";
 import CategoriesRow from "../../components/HomeScreen/CategoriesRow";
-import PromoBanner from "../../components/HomeScreen/PromoBanner";
-import SectionHeader from "../../components/HomeScreen/SectionHeader";
-import ProductCard from "../../components/HomeScreen/ProductCard";
 import FilterModal from "../../components/HomeScreen/FilterModal";
-import { featuredProducts } from "../../constants/home";
+import HomeHeader from "../../components/HomeScreen/HomeHeader";
+import ProductCard from "../../components/HomeScreen/ProductCard";
+import PromoBanner from "../../components/HomeScreen/PromoBanner";
+import SearchSection from "../../components/HomeScreen/SearchSection";
+import SectionHeader from "../../components/HomeScreen/SectionHeader";
+import { featuredProducts, homeCategories } from "../../constants/home";
 import { initialWishlistData } from "../../constants/wishlist";
 
-const filterCategories = [
-  "All",
-  "Vehicles",
-  "Phones",
-  "Electronics",
-  "Furniture",
-  "Clothing",
-  "Shoes",
-  "Books",
-  "Gaming",
-  "Home Items",
-  "Accessories",
-  "Sports",
-  "Beauty",
-  "Baby Items",
-  "Pet Supplies",
-];
+const normalizeCategory = (category?: string) => {
+  if (!category) {
+    return "";
+  }
+
+  return category.trim() === "Home" ? "Home Items" : category.trim();
+};
 
 export default function Home() {
   const insets = useSafeAreaInsets();
@@ -35,9 +25,26 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [draftCategory, setDraftCategory] = useState("All");
   const [maxPrice, setMaxPrice] = useState(5000);
+  const [draftMaxPrice, setDraftMaxPrice] = useState(5000);
 
   const wishlistCount = initialWishlistData.length;
+
+  const filterCategories = useMemo(() => {
+    const productCategories = featuredProducts
+      .map((item) => normalizeCategory(item.category))
+      .filter((category) => Boolean(category));
+
+    const baseCategories = homeCategories.map((item) =>
+      normalizeCategory(item.name)
+    );
+
+    return [
+      "All",
+      ...Array.from(new Set([...baseCategories, ...productCategories])),
+    ];
+  }, []);
 
   const filteredProducts = useMemo(() => {
     return featuredProducts.filter((item) => {
@@ -47,7 +54,7 @@ export default function Home() {
 
       const matchesPrice = Number(item.price) <= maxPrice;
 
-      const itemCategory = (item as any).category || "All";
+      const itemCategory = normalizeCategory(item.category);
       const matchesCategory =
         selectedCategory === "All" || itemCategory === selectedCategory;
 
@@ -55,12 +62,20 @@ export default function Home() {
     });
   }, [search, selectedCategory, maxPrice]);
 
+  const openFilter = () => {
+    setDraftCategory(selectedCategory);
+    setDraftMaxPrice(maxPrice);
+    setFilterVisible(true);
+  };
+
   const handleClearFilters = () => {
-    setSelectedCategory("All");
-    setMaxPrice(5000);
+    setDraftCategory("All");
+    setDraftMaxPrice(5000);
   };
 
   const handleApplyFilters = () => {
+    setSelectedCategory(draftCategory);
+    setMaxPrice(draftMaxPrice);
     setFilterVisible(false);
   };
 
@@ -81,7 +96,7 @@ export default function Home() {
               <SearchSection
                 search={search}
                 onChangeSearch={setSearch}
-                onFilterPress={() => setFilterVisible(true)}
+                onFilterPress={openFilter}
               />
               <SectionHeader title="Categories" />
               <CategoriesRow />
@@ -93,12 +108,12 @@ export default function Home() {
 
         <FilterModal
           visible={filterVisible}
-          selectedCategory={selectedCategory}
-          maxPrice={maxPrice}
+          selectedCategory={draftCategory}
+          maxPrice={draftMaxPrice}
           categories={filterCategories}
           onClose={() => setFilterVisible(false)}
-          onSelectCategory={setSelectedCategory}
-          onChangePrice={setMaxPrice}
+          onSelectCategory={setDraftCategory}
+          onChangePrice={setDraftMaxPrice}
           onClear={handleClearFilters}
           onApply={handleApplyFilters}
         />
