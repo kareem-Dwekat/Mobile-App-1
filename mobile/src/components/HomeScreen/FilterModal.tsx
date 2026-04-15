@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Modal,
   View,
@@ -37,14 +37,55 @@ export default function FilterModal({
 }: Props) {
   const { height } = useWindowDimensions();
 
+  const [isOpen, setIsOpen] = useState(visible);
+
+  useEffect(() => {
+    setIsOpen(visible);
+  }, [visible]);
+
+  useEffect(() => {
+    if (isOpen) {
+      console.log("Filter opened");
+    }
+  }, [isOpen]);
+
+  const categoryList = useMemo(() => categories, [categories]);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    onClose();
+  }, [onClose]);
+
+  const handleSelect = useCallback(
+    (category: string) => {
+      onSelectCategory(category);
+    },
+    [onSelectCategory]
+  );
+
+  const handlePrice = useCallback(
+    (value: number) => {
+      onChangePrice(value);
+    },
+    [onChangePrice]
+  );
+
+  const handleClear = useCallback(() => {
+    onClear();
+  }, [onClear]);
+
+  const handleApply = useCallback(() => {
+    onApply();
+  }, [onApply]);
+
   return (
     <Modal
-      visible={visible}
+      visible={isOpen}
       animationType="slide"
       transparent
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
+      <Pressable style={styles.overlay} onPress={handleClose}>
         <Pressable
           style={[styles.sheet, { maxHeight: height * 0.78 }]}
           onPress={() => {}}
@@ -53,7 +94,7 @@ export default function FilterModal({
 
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Filter</Text>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity onPress={handleClose}>
               <Ionicons name="close" size={28} color="#111" />
             </TouchableOpacity>
           </View>
@@ -67,16 +108,21 @@ export default function FilterModal({
             <Text style={styles.sectionTitle}>Categories</Text>
 
             <View style={styles.tagsWrap}>
-              {categories.map((category) => {
+              {categoryList.map((category) => {
                 const active = selectedCategory === category;
 
                 return (
                   <TouchableOpacity
                     key={category}
                     style={[styles.tag, active && styles.activeTag]}
-                    onPress={() => onSelectCategory(category)}
+                    onPress={() => handleSelect(category)}
                   >
-                    <Text style={[styles.tagText, active && styles.activeTagText]}>
+                    <Text
+                      style={[
+                        styles.tagText,
+                        active && styles.activeTagText,
+                      ]}
+                    >
                       {category}
                     </Text>
                   </TouchableOpacity>
@@ -92,7 +138,7 @@ export default function FilterModal({
               maximumValue={5000}
               step={1}
               value={maxPrice}
-              onValueChange={onChangePrice}
+              onValueChange={handlePrice}
               minimumTrackTintColor="#FF6A00"
               maximumTrackTintColor="#E5E5E5"
               thumbTintColor="#FF6A00"
@@ -105,11 +151,11 @@ export default function FilterModal({
           </ScrollView>
 
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.clearBtn} onPress={onClear}>
+            <TouchableOpacity style={styles.clearBtn} onPress={handleClear}>
               <Text style={styles.clearText}>Clear</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.applyBtn} onPress={onApply}>
+            <TouchableOpacity style={styles.applyBtn} onPress={handleApply}>
               <Text style={styles.applyText}>Apply</Text>
             </TouchableOpacity>
           </View>
@@ -118,7 +164,6 @@ export default function FilterModal({
     </Modal>
   );
 }
-
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
