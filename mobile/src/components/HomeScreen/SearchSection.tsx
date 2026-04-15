@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   TextInput,
@@ -7,6 +7,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useForm, Controller } from "react-hook-form";
 
 interface Props {
   search: string;
@@ -14,20 +15,55 @@ interface Props {
   onFilterPress: () => void;
 }
 
+type FormData = {
+  search: string;
+};
+
 const SearchSection = ({ search, onChangeSearch, onFilterPress }: Props) => {
   const { width } = useWindowDimensions();
   const isSmallDevice = width < 375;
 
+  const { control, setValue, watch } = useForm<FormData>({
+    defaultValues: {
+      search: search,
+    },
+  });
+
+  const searchValue = watch("search");
+
+  useEffect(() => {
+    setValue("search", search);
+  }, [search]);
+
+  useEffect(() => {
+    onChangeSearch(searchValue || "");
+  }, [searchValue]);
+
   return (
     <View style={styles.row}>
-      <View style={[styles.searchBox, { height: isSmallDevice ? 48 : 52 }]}>
+      <View
+        style={[
+          styles.searchBox,
+          { height: isSmallDevice ? 48 : 52 },
+        ]}
+      >
         <Ionicons name="search-outline" size={22} color="#777" />
-        <TextInput
-          placeholder="Search"
-          placeholderTextColor="#999"
-          value={search}
-          onChangeText={onChangeSearch}
-          style={[styles.input, { fontSize: isSmallDevice ? 14 : 16 }]}
+
+        <Controller
+          control={control}
+          name="search"
+          render={({ field: { onChange, value } }) => (
+            <TextInput
+              placeholder="Search"
+              placeholderTextColor="#999"
+              value={value}
+              onChangeText={onChange}
+              style={[
+                styles.input,
+                { fontSize: isSmallDevice ? 14 : 16 },
+              ]}
+            />
+          )}
         />
       </View>
 
