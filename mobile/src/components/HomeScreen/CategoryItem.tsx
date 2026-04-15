@@ -7,7 +7,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { CategoryItemType } from "../../types/home";
+import { CategoryItemType } from "../../types/category";
 
 interface Props {
   item: CategoryItemType;
@@ -50,7 +50,7 @@ const CategoryItem = ({ item, onPress }: Props) => {
         ]}
         numberOfLines={2}
       >
-        {item.name}
+        {item.title}
       </Text>
     </TouchableOpacity>
   );
