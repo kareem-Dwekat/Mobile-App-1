@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   View,
@@ -11,12 +11,19 @@ import {
 } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/config/firebaseConfig";
+
+interface CategoryType {
+  id: string;
+  title: string;
+  icon?: string;
+}
 
 interface Props {
   visible: boolean;
   selectedCategory: string;
   maxPrice: number;
-  categories: string[];
   onClose: () => void;
   onSelectCategory: (category: string) => void;
   onChangePrice: (value: number) => void;
@@ -28,7 +35,6 @@ export default function FilterModal({
   visible,
   selectedCategory,
   maxPrice,
-  categories,
   onClose,
   onSelectCategory,
   onChangePrice,
@@ -38,45 +44,32 @@ export default function FilterModal({
   const { height } = useWindowDimensions();
 
   const [isOpen, setIsOpen] = useState(visible);
+  const [categories, setCategories] = useState<CategoryType[]>([]);
 
   useEffect(() => {
     setIsOpen(visible);
   }, [visible]);
 
+  // Firebase fetch
   useEffect(() => {
-    if (isOpen) {
-      console.log("Filter opened");
-    }
-  }, [isOpen]);
+    const fetchCategories = async () => {
+      const snap = await getDocs(collection(db, "categories"));
 
-  const categoryList = useMemo(() => categories, [categories]);
+      const data = snap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as CategoryType[];
+
+      setCategories(data);
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
     onClose();
   }, [onClose]);
-
-  const handleSelect = useCallback(
-    (category: string) => {
-      onSelectCategory(category);
-    },
-    [onSelectCategory]
-  );
-
-  const handlePrice = useCallback(
-    (value: number) => {
-      onChangePrice(value);
-    },
-    [onChangePrice]
-  );
-
-  const handleClear = useCallback(() => {
-    onClear();
-  }, [onClear]);
-
-  const handleApply = useCallback(() => {
-    onApply();
-  }, [onApply]);
 
   return (
     <Modal
@@ -92,6 +85,7 @@ export default function FilterModal({
         >
           <View style={styles.handle} />
 
+          {/* HEADER */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Filter</Text>
             <TouchableOpacity onPress={handleClose}>
@@ -108,28 +102,26 @@ export default function FilterModal({
             <Text style={styles.sectionTitle}>Categories</Text>
 
             <View style={styles.tagsWrap}>
-              {categoryList.map((category) => {
-                const active = selectedCategory === category;
+              {categories.map((category) => {
+                const active = selectedCategory === category.title;
 
                 return (
                   <TouchableOpacity
-                    key={category}
+                    key={category.id}
                     style={[styles.tag, active && styles.activeTag]}
-                    onPress={() => handleSelect(category)}
+                    onPress={() => onSelectCategory(category.title)}
                   >
                     <Text
-                      style={[
-                        styles.tagText,
-                        active && styles.activeTagText,
-                      ]}
+                      style={[styles.tagText, active && styles.activeTagText]}
                     >
-                      {category}
+                      {category.title}
                     </Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
 
+            {/* PRICE */}
             <Text style={styles.sectionTitle}>Price Range</Text>
 
             <Slider
@@ -138,7 +130,7 @@ export default function FilterModal({
               maximumValue={5000}
               step={1}
               value={maxPrice}
-              onValueChange={handlePrice}
+              onValueChange={onChangePrice}
               minimumTrackTintColor="#FF6A00"
               maximumTrackTintColor="#E5E5E5"
               thumbTintColor="#FF6A00"
@@ -150,12 +142,13 @@ export default function FilterModal({
             </View>
           </ScrollView>
 
+          {/* FOOTER */}
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.clearBtn} onPress={handleClear}>
+            <TouchableOpacity style={styles.clearBtn} onPress={onClear}>
               <Text style={styles.clearText}>Clear</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.applyBtn} onPress={handleApply}>
+            <TouchableOpacity style={styles.applyBtn} onPress={onApply}>
               <Text style={styles.applyText}>Apply</Text>
             </TouchableOpacity>
           </View>
@@ -247,7 +240,6 @@ const styles = StyleSheet.create({
   priceRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
   },
   priceText: {
     fontSize: 16,
@@ -260,7 +252,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 24,
-    backgroundColor: "#fff",
   },
   clearBtn: {
     flex: 1,
@@ -272,11 +263,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#fff",
   },
-  clearText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#222",
-  },
   applyBtn: {
     flex: 1,
     height: 56,
@@ -284,6 +270,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FF6A00",
+  },
+  clearText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#222",
   },
   applyText: {
     fontSize: 18,
