@@ -1,27 +1,35 @@
 import React from "react";
-import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Image, TouchableOpacity, StyleSheet, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 type ProfileImageProps = {
   imageUri?: string;
+  name?: string;
   onEditPress?: () => void;
 };
 
-const DEFAULT_IMAGE = "https://i.pravatar.cc/150?img=12";
-
 const ProfileImage = ({
-  imageUri = DEFAULT_IMAGE,
+  imageUri,
+  name = "User",
   onEditPress,
 }: ProfileImageProps) => {
   return (
     <View style={styles.imageWrapper}>
       <View style={styles.imageContainer}>
-        <Image source={{ uri: imageUri }} style={styles.image} />
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={styles.image} />
+        ) : (
+          <View style={styles.placeholder}>
+            <Ionicons name="person-outline" size={42} color="#9ca3af" />
+          </View>
+        )}
 
         <TouchableOpacity style={styles.editBtn} onPress={onEditPress}>
           <Ionicons name="pencil" size={14} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      <Text style={styles.name}>{name}</Text>
     </View>
   );
 };
@@ -41,6 +49,22 @@ const styles = StyleSheet.create({
     width: 110,
     height: 110,
     borderRadius: 55,
+  },
+  placeholder: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: "#f3f4f6",
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  name: {
+    marginTop: 12,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#222",
   },
   editBtn: {
     position: "absolute",

@@ -27,5 +27,6 @@ export interface ProfileHeaderProps {
 
 export interface ProfileImageProps {
   imageUri?: string;
+  name?: string;
   onEditPress?: () => void;
 }
