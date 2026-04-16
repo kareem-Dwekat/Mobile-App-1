@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FlatList, StyleSheet, View, Text, ActivityIndicator } from "react-native";
+import {
+  FlatList,
+  StyleSheet,
+  View,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import CategoriesRow from "../../components/HomeScreen/CategoriesRow";
@@ -10,7 +16,6 @@ import PromoBanner from "../../components/HomeScreen/PromoBanner";
 import SearchSection from "../../components/HomeScreen/SearchSection";
 import SectionHeader from "../../components/HomeScreen/SectionHeader";
 
-import { homeCategories } from "../../constants/home";
 import { initialWishlistData } from "../../constants/wishlist";
 import { getProductsFromFirestore } from "../../services/product.service";
 
@@ -50,6 +55,7 @@ export default function Home() {
     try {
       setLoading(true);
       const data = await getProductsFromFirestore();
+      console.log("Firestore products:", data);
       setProducts(data as ProductItem[]);
     } catch (error) {
       console.log("Load products error:", error);
@@ -62,25 +68,10 @@ export default function Home() {
     loadProducts();
   }, []);
 
-  const filterCategories = useMemo(() => {
-    const productCategories = products
-      .map((item) => normalizeCategory(item.category))
-      .filter((category) => Boolean(category));
-
-    const baseCategories = homeCategories.map((item) =>
-      normalizeCategory(item.name)
-    );
-
-    return [
-      "All",
-      ...Array.from(new Set([...baseCategories, ...productCategories])),
-    ];
-  }, [products]);
-
   const filteredProducts = useMemo(() => {
     return products.filter((item) => {
       const matchesSearch = item.productName
-        .toLowerCase()
+        ?.toLowerCase()
         .includes(search.toLowerCase());
 
       const matchesPrice = Number(item.price) <= maxPrice;
@@ -152,7 +143,6 @@ export default function Home() {
           visible={filterVisible}
           selectedCategory={draftCategory}
           maxPrice={draftMaxPrice}
-          categories={filterCategories}
           onClose={() => setFilterVisible(false)}
           onSelectCategory={setDraftCategory}
           onChangePrice={setDraftMaxPrice}
