@@ -1,12 +1,12 @@
-import React from "react";
-import { View, StyleSheet, Alert } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, Alert, ScrollView } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
 import ProfileHeader from "../../components/AccountComponents/AccountHeader";
 import ProfileImage from "../../components/AccountComponents/AccountImage";
 import MenuItem from "../../components/AccountComponents/MenuItem";
-import { logoutUser } from "@/services/auth.service";
+import { getCurrentUserName, logoutUser } from "@/services/auth.service";
 
 const PROFILE_MENU_ITEMS = [
   { title: "My Orders", icon: "receipt-outline" },
@@ -19,6 +19,52 @@ const PROFILE_MENU_ITEMS = [
 ];
 
 const ProfileScreen = () => {
+  const insets = useSafeAreaInsets();
+  const [profileName, setProfileName] = useState("User");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadProfileName = async () => {
+      try {
+        const currentUserName = await getCurrentUserName();
+
+        if (isMounted) {
+          setProfileName(currentUserName);
+        }
+      } catch {
+        if (isMounted) {
+          setProfileName("User");
+        }
+      }
+    };
+
+    loadProfileName();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) {
+      return;
+    }
+
+    try {
+      setIsLoggingOut(true);
+      await logoutUser();
+      router.replace("/login");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Logout failed";
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   const handleMenuPress = (title: string) => {
     switch (title) {
       case "My Orders":
@@ -46,42 +92,31 @@ const ProfileScreen = () => {
         break;
 
       case "Logout":
-        Alert.alert(
-          "Confirm Logout",
-          "Are you sure you want to logout?",
-          [
-            {
-              text: "Cancel",
-              style: "cancel",
-            },
-            {
-              text: "Yes, Logout",
-              style: "destructive",
-              onPress: async () => {
-                try {
-                  await logoutUser();
-                  router.replace("/login");
-                } catch (error) {
-                  Alert.alert("Error", "Logout failed");
-                }
-              },
-            },
-          ],
-          { cancelable: true }
-        );
+        void handleLogout();
         break;
 
       default:
         Alert.alert(title);
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <View style={styles.container}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: insets.bottom + 96 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         <ProfileHeader onBackPress={() => router.back()} />
 
-        <ProfileImage onEditPress={() => Alert.alert("Edit Profile Image")} />
+        <ProfileImage
+          name={profileName}
+          onEditPress={() => Alert.alert("Edit Profile Image")}
+        />
 
         <View style={styles.menu}>
           {PROFILE_MENU_ITEMS.map((item) => (
@@ -93,7 +128,7 @@ const ProfileScreen = () => {
             />
           ))}
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -107,11 +142,12 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: 20,
+  },
+  content: {
     paddingTop: 10,
+    paddingHorizontal: 20,
   },
   menu: {
-    flex: 1,
     marginTop: 10,
     backgroundColor: "#fafafa",
     borderRadius: 14,

@@ -23,6 +23,29 @@ export const loginUser = async (email: string, password: string) => {
   };
 };
 
+export const getCurrentUserName = async () => {
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    return "User";
+  }
+
+  const fallbackName =
+    currentUser.displayName || currentUser.email?.split("@")[0] || "User";
+
+  const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+
+  if (!userDoc.exists()) {
+    return fallbackName;
+  }
+
+  const userData = userDoc.data();
+  const fullName =
+    typeof userData?.fullName === "string" ? userData.fullName.trim() : "";
+
+  return fullName || fallbackName;
+};
+
 export const signupUser = async (
   fullName: string,
   email: string,

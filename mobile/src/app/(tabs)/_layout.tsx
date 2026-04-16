@@ -7,9 +7,16 @@ export default function TabsLayout() {
   const pathname = usePathname();
 
   const getActiveTab = () => {
-    if (pathname.includes("profile")) return "account";
-    if (pathname.includes("category")) return "categories";
-    if (pathname.includes("cart")) return "cart";
+    const normalizedPath = pathname.toLowerCase();
+
+    if (
+      normalizedPath.includes("account") ||
+      normalizedPath.includes("profile")
+    ) {
+      return "account";
+    }
+    if (normalizedPath.includes("category")) return "categories";
+    if (normalizedPath.includes("cart")) return "cart";
     return "home";
   };
 
