@@ -33,18 +33,18 @@ const SearchSection = ({ search, onChangeSearch, onFilterPress }: Props) => {
 
   useEffect(() => {
     setValue("search", search);
-  }, [search]);
+  }, [search, setValue]);
 
   useEffect(() => {
     onChangeSearch(searchValue || "");
-  }, [searchValue]);
+  }, [searchValue, onChangeSearch]);
 
   return (
     <View style={styles.row}>
       <View
         style={[
           styles.searchBox,
-          { height: isSmallDevice ? 48 : 52 },
+          { height: isSmallDevice ? 48 : 54 },
         ]}
       >
         <Ionicons name="search-outline" size={22} color="#777" />
@@ -54,7 +54,7 @@ const SearchSection = ({ search, onChangeSearch, onFilterPress }: Props) => {
           name="search"
           render={({ field: { onChange, value } }) => (
             <TextInput
-              placeholder="Search"
+              placeholder="Search products..."
               placeholderTextColor="#999"
               value={value}
               onChangeText={onChange}
@@ -68,16 +68,17 @@ const SearchSection = ({ search, onChangeSearch, onFilterPress }: Props) => {
       </View>
 
       <TouchableOpacity
+        activeOpacity={0.8}
         onPress={onFilterPress}
         style={[
           styles.filterBtn,
           {
-            width: isSmallDevice ? 48 : 52,
-            height: isSmallDevice ? 48 : 52,
+            width: isSmallDevice ? 48 : 54,
+            height: isSmallDevice ? 48 : 54,
           },
         ]}
       >
-        <Ionicons name="options-outline" size={22} color="#111" />
+        <Ionicons name="options-outline" size={22} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -95,7 +96,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     borderColor: "#E5E5E5",
-    borderRadius: 14,
+    borderRadius: 16,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 14,
@@ -108,11 +109,14 @@ const styles = StyleSheet.create({
     color: "#111",
   },
   filterBtn: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#E5E5E5",
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#FF6B00",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
   },
 });
