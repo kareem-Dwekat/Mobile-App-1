@@ -16,7 +16,7 @@ import ProfileInput from "@/components/profile/ProfileInput";
 import ProfileSelect from "@/components/profile/ProfileSelect";
 
 import { COLORS ,COUNTRY_OPTIONS  ,STATE_OPTIONS ,CITY_OPTIONS} from "@/constants/Profile";
-import { ProfileFormData } from "@/types/profile";
+import { ProfileFormData } from "@/types/Profile";
 
 export default function ProfileScreen() {
   const router = useRouter();
