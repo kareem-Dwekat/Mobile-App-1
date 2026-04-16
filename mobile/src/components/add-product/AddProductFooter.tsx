@@ -7,6 +7,7 @@ type Props = {
   onBack: () => void;
   onNext: () => void;
   onSubmit: () => void;
+  disabled?: boolean;
 };
 
 export default function AddProductFooter({
@@ -14,29 +15,47 @@ export default function AddProductFooter({
   onBack,
   onNext,
   onSubmit,
+  disabled = false,
 }: Props) {
   return (
     <View style={styles.row}>
       <TouchableOpacity
-        style={[styles.button, styles.secondaryButton]}
+        style={[
+          styles.button,
+          styles.secondaryButton,
+          disabled && styles.disabledButton,
+        ]}
         onPress={onBack}
+        disabled={disabled}
       >
         <Text style={[styles.buttonText, styles.secondaryText]}>Back</Text>
       </TouchableOpacity>
 
       {currentStep < 3 ? (
         <TouchableOpacity
-          style={[styles.button, styles.primaryButton]}
+          style={[
+            styles.button,
+            styles.primaryButton,
+            disabled && styles.disabledButton,
+          ]}
           onPress={onNext}
+          disabled={disabled}
         >
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
-          style={[styles.button, styles.primaryButton]}
+          style={[
+            styles.button,
+            styles.primaryButton,
+            disabled && styles.disabledButton,
+          ]}
           onPress={onSubmit}
+          disabled={disabled}
         >
-          <Text style={styles.buttonText}>Submit</Text>
+          <Text style={styles.buttonText}>
+            {disabled ? "Uploading..." : "Submit"}
+          </Text>
         </TouchableOpacity>
       )}
     </View>
@@ -64,6 +83,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: ADD_PRODUCT_COLORS.border,
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
   buttonText: {
     color: "#fff",
