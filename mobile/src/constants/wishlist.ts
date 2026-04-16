@@ -6,8 +6,7 @@ export const initialWishlistData: WishlistItemType[] = [
     title: "Classic Cotton Oxford Shirt",
     category: "Clothing",
     price: 200,
-    image:
-      "https://images.unsplash.com/photo-1593032465171-8b1c2d0fcd0c?q=80&w=800",
+    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400",
     qty: 1,
     selected: true,
   },
@@ -16,8 +15,7 @@ export const initialWishlistData: WishlistItemType[] = [
     title: "Slim Fit Denim Shirt",
     category: "Clothing",
     price: 299,
-    image:
-      "https://images.unsplash.com/photo-1520975922203-b1a8b2d7b6c0?q=80&w=800",
+    image: "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=400",
     qty: 1,
     selected: true,
   },
@@ -26,8 +24,7 @@ export const initialWishlistData: WishlistItemType[] = [
     title: "Linen Casual Shirt",
     category: "Clothing",
     price: 350,
-    image:
-      "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=800",
+    image: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400",
     qty: 1,
     selected: true,
   },
@@ -36,8 +33,7 @@ export const initialWishlistData: WishlistItemType[] = [
     title: "Casual Jogger",
     category: "Sportswear",
     price: 200,
-    image:
-      "https://images.unsplash.com/photo-1593032457866-5bba5b9c2f93?q=80&w=800",
+    image: "https://images.unsplash.com/photo-1517438476312-10d79c077509?w=400",
     qty: 1,
     selected: true,
   },
