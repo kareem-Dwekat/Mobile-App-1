@@ -45,12 +45,10 @@ export default function FilterModal({
 
   const [isOpen, setIsOpen] = useState(visible);
   const [categories, setCategories] = useState<CategoryType[]>([]);
-
   useEffect(() => {
     setIsOpen(visible);
   }, [visible]);
 
-  // Firebase fetch
   useEffect(() => {
     const fetchCategories = async () => {
       const snap = await getDocs(collection(db, "categories"));
