@@ -1,19 +1,21 @@
 import { useState } from "react";
-import { ProductFormData, ProductFormErrors } from "../types/addProduct";
-import { validateAddProductForm } from "../utils/addProductValidation";
+import {
+  ProductFormData,
+  ProductFormErrors,
+} from "../types/addProduct";
+
+const initialFormData: ProductFormData = {
+  productName: "",
+  description: "",
+  price: "",
+  stock: "",
+  category: "",
+  brand: "",
+};
 
 export default function useAddProduct() {
   const [currentStep, setCurrentStep] = useState(1);
-
-  const [formData, setFormData] = useState<ProductFormData>({
-    productName: "",
-    description: "",
-    price: "",
-    stock: "",
-    category: "",
-    brand: "",
-  });
-
+  const [formData, setFormData] = useState<ProductFormData>(initialFormData);
   const [errors, setErrors] = useState<ProductFormErrors>({});
   const [images, setImages] = useState<string[]>([]);
 
@@ -29,8 +31,8 @@ export default function useAddProduct() {
     }));
   };
 
-  const addMockImage = () => {
-    setImages((prev) => [...prev, `image-${prev.length + 1}`]);
+  const addImage = (imageUri: string) => {
+    setImages((prev) => [...prev, imageUri]);
   };
 
   const removeImage = (index: number) => {
@@ -38,21 +40,49 @@ export default function useAddProduct() {
   };
 
   const nextStep = () => {
-    if (currentStep < 3) {
-      setCurrentStep((prev) => prev + 1);
-    }
+    setCurrentStep((prev) => (prev < 3 ? prev + 1 : prev));
   };
 
   const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep((prev) => prev - 1);
-    }
+    setCurrentStep((prev) => (prev > 1 ? prev - 1 : prev));
+  };
+
+  const resetForm = () => {
+    setCurrentStep(1);
+    setFormData(initialFormData);
+    setErrors({});
+    setImages([]);
   };
 
   const validate = () => {
-    const validationErrors = validateAddProductForm(formData);
-    setErrors(validationErrors);
-    return Object.keys(validationErrors).length === 0;
+    const newErrors: ProductFormErrors = {};
+
+    if (!formData.productName.trim()) {
+      newErrors.productName = "Product name is required";
+    }
+
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    }
+
+    if (!formData.price.trim()) {
+      newErrors.price = "Price is required";
+    }
+
+    if (!formData.stock.trim()) {
+      newErrors.stock = "Stock is required";
+    }
+
+    if (!formData.category.trim()) {
+      newErrors.category = "Category is required";
+    }
+
+    if (!formData.brand.trim()) {
+      newErrors.brand = "Brand is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   return {
@@ -61,10 +91,11 @@ export default function useAddProduct() {
     errors,
     images,
     updateField,
-    addMockImage,
+    addImage,
     removeImage,
     nextStep,
     prevStep,
+    resetForm,
     validate,
   };
 }

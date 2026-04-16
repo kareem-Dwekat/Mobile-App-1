@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
 type ProfileHeaderProps = {
   onBackPress?: () => void;
@@ -10,7 +9,7 @@ const ProfileHeader = ({ onBackPress }: ProfileHeaderProps) => {
   return (
     <View style={styles.header}>
       <TouchableOpacity style={styles.backBtn} onPress={onBackPress}>
-       
+
       </TouchableOpacity>
 
       <Text style={styles.title}>Account</Text>
@@ -25,11 +24,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
-    paddingHorizontal: 6,
+    paddingHorizontal: 2,
   },
   backBtn: {
     padding: 6,
-    marginRight: 8,
+    marginRight: 0,
   },
   title: {
     fontSize: 24,

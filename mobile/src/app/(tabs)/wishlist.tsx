@@ -1,74 +1,36 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Image,
-  TouchableOpacity,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import React from "react";
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { initialWishlistData } from "../../constants/wishlist";
-import { WishlistItemType } from "../../types/wishlist";
 import { useCart } from "../../hooks/CartContext";
+import { useWishlist } from "../../hooks/useWishlist";
+import { WishlistItemType } from "../../types/wishlist";
 
 export default function Wishlist() {
-  const [items, setItems] = useState<WishlistItemType[]>(initialWishlistData);
   const { addToCart } = useCart();
+  const {
+    items,
+    toggleSelect,
+    changeQty,
+    toggleSelectAll,
+    handleDeleteSelected,
+    handleAddToCart,
+  } = useWishlist();
 
-  const toggleSelect = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, selected: !item.selected } : item
-      )
-    );
-  };
-
-  const changeQty = (id: string, type: "inc" | "dec") => {
-    setItems((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const newQty = type === "inc" ? item.qty + 1 : item.qty - 1;
-          return { ...item, qty: newQty < 1 ? 1 : newQty };
-        }
-        return item;
-      })
-    );
-  };
-
-  const toggleSelectAll = () => {
-    const allSelected = items.length > 0 && items.every((item) => item.selected);
-    setItems((prev) =>
-      prev.map((item) => ({ ...item, selected: !allSelected }))
-    );
-  };
-
-  const handleDeleteSelected = () => {
-    setItems((prev) => prev.filter((item) => !item.selected));
-  };
-
-  const handleAddToCart = () => {
-    const selectedItems = items
-      .filter((item) => item.selected)
-      .map((item) => ({
-        id: item.id,
-        title: item.title,
-        category: item.category,
-        price: item.price,
-        image: item.image,
-        qty: item.qty,
-      }));
-
-    if (selectedItems.length === 0) return;
-
-    addToCart(selectedItems);
-
-    setItems((prev) => prev.filter((item) => !item.selected));
-
+  const onAddToCart = () => {
+    handleAddToCart(addToCart);
     router.push("/(tabs)/cart");
   };
+
+  // @ts-ignore - Firebase sync in background
 
   const renderItem = ({ item }: { item: WishlistItemType }) => (
     <View style={styles.card}>
@@ -129,7 +91,7 @@ export default function Wishlist() {
         </TouchableOpacity>
 
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.cartBtn} onPress={handleAddToCart}>
+          <TouchableOpacity style={styles.cartBtn} onPress={onAddToCart}>
             <Text style={styles.cartText}>Add to Cart</Text>
           </TouchableOpacity>
 

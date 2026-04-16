@@ -51,14 +51,18 @@ export default function FilterModal({
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const snap = await getDocs(collection(db, "categories"));
+      try {
+        const snap = await getDocs(collection(db, "categories"));
 
-      const data = snap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as CategoryType[];
+        const data = snap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as CategoryType[];
 
-      setCategories(data);
+        setCategories(data);
+      } catch (error) {
+        console.log("Fetch categories error:", error);
+      }
     };
 
     fetchCategories();
@@ -83,7 +87,6 @@ export default function FilterModal({
         >
           <View style={styles.handle} />
 
-          {/* HEADER */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Filter</Text>
             <TouchableOpacity onPress={handleClose}>
@@ -100,6 +103,23 @@ export default function FilterModal({
             <Text style={styles.sectionTitle}>Categories</Text>
 
             <View style={styles.tagsWrap}>
+              <TouchableOpacity
+                style={[
+                  styles.tag,
+                  selectedCategory === "All" && styles.activeTag,
+                ]}
+                onPress={() => onSelectCategory("All")}
+              >
+                <Text
+                  style={[
+                    styles.tagText,
+                    selectedCategory === "All" && styles.activeTagText,
+                  ]}
+                >
+                  All
+                </Text>
+              </TouchableOpacity>
+
               {categories.map((category) => {
                 const active = selectedCategory === category.title;
 
@@ -119,7 +139,6 @@ export default function FilterModal({
               })}
             </View>
 
-            {/* PRICE */}
             <Text style={styles.sectionTitle}>Price Range</Text>
 
             <Slider
@@ -140,7 +159,6 @@ export default function FilterModal({
             </View>
           </ScrollView>
 
-          {/* FOOTER */}
           <View style={styles.footer}>
             <TouchableOpacity style={styles.clearBtn} onPress={onClear}>
               <Text style={styles.clearText}>Clear</Text>
@@ -155,6 +173,7 @@ export default function FilterModal({
     </Modal>
   );
 }
+
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,

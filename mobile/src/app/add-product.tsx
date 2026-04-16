@@ -1,13 +1,22 @@
 import React from "react";
 import { Alert, SafeAreaView, ScrollView, StyleSheet } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
+
 import AddProductHeader from "../components/add-product/AddProductHeader";
 import Stepper from "../components/add-product/Stepper";
 import SectionCard from "../components/add-product/SectionCard";
 import FormInput from "../components/add-product/FormInput";
+import FormSelect from "../components/add-product/FormSelect";
 import ImagePickerBox from "../components/add-product/ImagePickerBox";
 import AddProductFooter from "../components/add-product/AddProductFooter";
-import { ADD_PRODUCT_COLORS } from "../constants/addProduct";
+
+import {
+  ADD_PRODUCT_COLORS,
+  ADD_PRODUCT_CATEGORIES,
+} from "../constants/addProduct";
 import useAddProduct from "../hooks/useAddProduct";
+import { saveProductToFirestore } from "../services/product.service";
 
 export default function AddProductScreen() {
   const {
@@ -16,7 +25,7 @@ export default function AddProductScreen() {
     errors,
     images,
     updateField,
-    addMockImage,
+    addImage,
     removeImage,
     nextStep,
     prevStep,
@@ -29,15 +38,62 @@ export default function AddProductScreen() {
     }
   };
 
-  const handleSubmit = () => {
+  const handlePickImage = async () => {
+    try {
+      const permission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permission.granted) {
+        Alert.alert(
+          "Permission required",
+          "Please allow access to your photos."
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets.length > 0) {
+        const imageUri = result.assets[0].uri;
+        addImage(imageUri);
+      }
+    } catch (error) {
+      console.log("Image pick error:", error);
+      Alert.alert("Error", "Failed to pick image");
+    }
+  };
+
+  const handleSubmit = async () => {
     const isValid = validate();
 
     if (!isValid) {
-      Alert.alert("Validation Error", "Please fill all required fields correctly.");
+      Alert.alert(
+        "Validation Error",
+        "Please fill all required fields correctly."
+      );
       return;
     }
 
-    Alert.alert("Success", "Product added successfully");
+    try {
+      await saveProductToFirestore({
+        formData,
+        images,
+      });
+
+      Alert.alert("Success", "Product added successfully", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/(tabs)/home"),
+        },
+      ]);
+    } catch (error) {
+      console.log("Save product error:", error);
+      Alert.alert("Error", "Failed to save product");
+    }
   };
 
   return (
@@ -91,12 +147,12 @@ export default function AddProductScreen() {
               onChangeText={(value) => updateField("stock", value)}
             />
 
-            <FormInput
+            <FormSelect
               label="Category"
               value={formData.category}
-              placeholder="Enter category"
+              options={ADD_PRODUCT_CATEGORIES}
               error={errors.category}
-              onChangeText={(value) => updateField("category", value)}
+              onValueChange={(value) => updateField("category", value)}
             />
 
             <FormInput
@@ -113,7 +169,7 @@ export default function AddProductScreen() {
           <SectionCard title="Product Images">
             <ImagePickerBox
               images={images}
-              onAddImage={addMockImage}
+              onAddImage={handlePickImage}
               onRemoveImage={removeImage}
             />
           </SectionCard>

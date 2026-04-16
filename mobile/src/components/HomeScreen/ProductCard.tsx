@@ -8,10 +8,16 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ProductItemType } from "../../types/home";
 
 interface Props {
-  item: ProductItemType;
+  item: {
+    id: string;
+    productName?: string;
+    price?: number;
+    category?: string;
+    brand?: string;
+    images?: string[];
+  };
   onPress?: () => void;
 }
 
@@ -21,63 +27,55 @@ const ProductCard = ({ item, onPress }: Props) => {
   const imageHeight = cardWidth * 1.05;
   const isSmallDevice = width < 375;
 
+  const title = item?.productName || "No Title";
+  const price = item?.price ?? 0;
+  const category = item?.category || "No Category";
+  const brand = item?.brand || "";
+  const imageSource =
+    item?.images && item.images.length > 0
+      ? item.images[0]
+      : "https://via.placeholder.com/300x300.png?text=No+Image";
+
   return (
     <TouchableOpacity
       style={[styles.card, { width: cardWidth }]}
-      activeOpacity={0.85}
+      activeOpacity={0.9}
       onPress={onPress}
     >
-      <Image
-        source={{ uri: item.image }}
-        style={[styles.image, { height: imageHeight }]}
-        resizeMode="cover"
-      />
+      <View>
+        <Image
+          source={{ uri: imageSource }}
+          style={[styles.image, { height: imageHeight }]}
+          resizeMode="cover"
+        />
+
+        <View style={styles.heart}>
+          <Ionicons name="heart-outline" size={16} color="#fff" />
+        </View>
+      </View>
 
       <Text
         style={[styles.title, { fontSize: isSmallDevice ? 14 : 16 }]}
         numberOfLines={1}
       >
-        {item.title}
+        {title}
       </Text>
+
+      <Text style={styles.category} numberOfLines={1}>
+        {category}
+      </Text>
+
+      {brand ? (
+        <Text style={styles.brand} numberOfLines={1}>
+          {brand}
+        </Text>
+      ) : null}
 
       <View style={styles.priceRow}>
         <Text style={[styles.price, { fontSize: isSmallDevice ? 14 : 16 }]}>
-          ${item.price}
-        </Text>
-
-        {item.oldPrice ? (
-          <Text
-            style={[styles.oldPrice, { fontSize: isSmallDevice ? 12 : 14 }]}
-          >
-            ${item.oldPrice}
-          </Text>
-        ) : null}
-      </View>
-
-      <View style={styles.ratingRow}>
-        <Ionicons name="star" size={14} color="#F6B100" />
-        <Text style={[styles.rating, { fontSize: isSmallDevice ? 12 : 13 }]}>
-          {item.rating} ({item.reviews})
+          ${price}
         </Text>
       </View>
-
-      {item.location ? (
-        <View style={styles.metaRow}>
-          <Ionicons name="location-outline" size={13} color="#6B7280" />
-          <Text style={styles.metaText} numberOfLines={1}>
-            {item.location}
-          </Text>
-        </View>
-      ) : null}
-
-      {item.condition ? (
-        <View style={styles.metaRow}>
-          <Ionicons name="pricetag-outline" size={13} color="#6B7280" />
-          <Text style={styles.metaText} numberOfLines={1}>
-            {item.condition}
-          </Text>
-        </View>
-      ) : null}
     </TouchableOpacity>
   );
 };
@@ -87,58 +85,51 @@ export default ProductCard;
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
-    borderRadius: 18,
-    marginBottom: 18,
+    borderRadius: 16,
+    marginBottom: 16,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#ECECEC",
+    borderColor: "#eee",
   },
   image: {
     width: "100%",
-    marginBottom: 10,
+  },
+  heart: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    padding: 6,
+    borderRadius: 20,
   },
   title: {
     fontWeight: "600",
     color: "#222",
-    marginBottom: 8,
+    marginTop: 8,
+    marginBottom: 4,
     paddingHorizontal: 8,
+  },
+  category: {
+    fontSize: 13,
+    color: "#6B7280",
+    paddingHorizontal: 8,
+    marginBottom: 4,
+    textTransform: "capitalize",
+  },
+  brand: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    paddingHorizontal: 8,
+    marginBottom: 6,
   },
   priceRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 8,
-    marginBottom: 6,
-    flexWrap: "wrap",
+    marginBottom: 10,
   },
   price: {
     fontWeight: "700",
     color: "#111",
-    marginRight: 8,
-  },
-  oldPrice: {
-    color: "#999",
-    textDecorationLine: "line-through",
-  },
-  ratingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 8,
-    marginBottom: 8,
-  },
-  rating: {
-    color: "#555",
-    marginLeft: 4,
-  },
-  metaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 8,
-    marginBottom: 8,
-  },
-  metaText: {
-    fontSize: 12,
-    color: "#6B7280",
-    marginLeft: 4,
-    flex: 1,
   },
 });
