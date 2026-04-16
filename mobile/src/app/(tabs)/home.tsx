@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { FlatList, StyleSheet, View, Text, ActivityIndicator } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+
 import CategoriesRow from "../../components/HomeScreen/CategoriesRow";
 import FilterModal from "../../components/HomeScreen/FilterModal";
 import HomeHeader from "../../components/HomeScreen/HomeHeader";
@@ -8,14 +9,25 @@ import ProductCard from "../../components/HomeScreen/ProductCard";
 import PromoBanner from "../../components/HomeScreen/PromoBanner";
 import SearchSection from "../../components/HomeScreen/SearchSection";
 import SectionHeader from "../../components/HomeScreen/SectionHeader";
-import { featuredProducts, homeCategories } from "../../constants/home";
+
+import { homeCategories } from "../../constants/home";
 import { initialWishlistData } from "../../constants/wishlist";
+import { getProductsFromFirestore } from "../../services/product.service";
+
+type ProductItem = {
+  id: string;
+  productName: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  brand: string;
+  images: string[];
+  createdAt?: any;
+};
 
 const normalizeCategory = (category?: string) => {
-  if (!category) {
-    return "";
-  }
-
+  if (!category) return "";
   return category.trim() === "Home" ? "Home Items" : category.trim();
 };
 
@@ -29,10 +41,29 @@ export default function Home() {
   const [maxPrice, setMaxPrice] = useState(5000);
   const [draftMaxPrice, setDraftMaxPrice] = useState(5000);
 
+  const [products, setProducts] = useState<ProductItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const wishlistCount = initialWishlistData.length;
 
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await getProductsFromFirestore();
+      setProducts(data as ProductItem[]);
+    } catch (error) {
+      console.log("Load products error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
   const filterCategories = useMemo(() => {
-    const productCategories = featuredProducts
+    const productCategories = products
       .map((item) => normalizeCategory(item.category))
       .filter((category) => Boolean(category));
 
@@ -44,11 +75,11 @@ export default function Home() {
       "All",
       ...Array.from(new Set([...baseCategories, ...productCategories])),
     ];
-  }, []);
+  }, [products]);
 
   const filteredProducts = useMemo(() => {
-    return featuredProducts.filter((item) => {
-      const matchesSearch = item.title
+    return products.filter((item) => {
+      const matchesSearch = item.productName
         .toLowerCase()
         .includes(search.toLowerCase());
 
@@ -60,7 +91,7 @@ export default function Home() {
 
       return matchesSearch && matchesPrice && matchesCategory;
     });
-  }, [search, selectedCategory, maxPrice]);
+  }, [products, search, selectedCategory, maxPrice]);
 
   const openFilter = () => {
     setDraftCategory(selectedCategory);
@@ -82,29 +113,40 @@ export default function Home() {
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={[styles.container, { paddingTop: insets.top > 0 ? 8 : 16 }]}>
-        <FlatList
-          data={filteredProducts}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.productRow}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => <ProductCard item={item} />}
-          contentContainerStyle={styles.listContent}
-          ListHeaderComponent={
-            <>
-              <HomeHeader wishlistCount={wishlistCount} />
-              <SearchSection
-                search={search}
-                onChangeSearch={setSearch}
-                onFilterPress={openFilter}
-              />
-              <SectionHeader title="Categories" />
-              <CategoriesRow />
-              <PromoBanner />
-              <SectionHeader title="Featured Products" actionText="See all" />
-            </>
-          }
-        />
+        {loading ? (
+          <ActivityIndicator size="large" style={styles.loader} />
+        ) : (
+          <FlatList
+            data={filteredProducts}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            columnWrapperStyle={styles.productRow}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
+            ListHeaderComponent={
+              <>
+                <HomeHeader wishlistCount={wishlistCount} />
+
+                <SearchSection
+                  search={search}
+                  onChangeSearch={setSearch}
+                  onFilterPress={openFilter}
+                />
+
+                <SectionHeader title="Categories" />
+                <CategoriesRow />
+
+                <PromoBanner />
+
+                <SectionHeader title="Featured Products" actionText="See all" />
+              </>
+            }
+            renderItem={({ item }) => <ProductCard item={item} />}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>No products found</Text>
+            }
+          />
+        )}
 
         <FilterModal
           visible={filterVisible}
@@ -137,5 +179,15 @@ const styles = StyleSheet.create({
   },
   productRow: {
     justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+    color: "#666",
+  },
+  loader: {
+    marginTop: 40,
   },
 });

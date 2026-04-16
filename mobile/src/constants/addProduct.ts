@@ -1,5 +1,12 @@
 import { StepItem } from "../types/addProduct";
-
+export const ADD_PRODUCT_CATEGORIES = [
+  { label: "Electronics", value: "electronics" },
+  { label: "Clothing", value: "clothing" },
+  { label: "Shoes", value: "shoes" },
+  { label: "Beauty", value: "beauty" },
+  { label: "Home", value: "home" },
+  { label: "Sports", value: "sports" },
+];
 export const ADD_PRODUCT_COLORS = {
   background: "#F8F8F8",
   white: "#FFFFFF",

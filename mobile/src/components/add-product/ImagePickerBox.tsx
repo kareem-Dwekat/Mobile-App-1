@@ -1,5 +1,11 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ADD_PRODUCT_COLORS } from "../../constants/addProduct";
 
@@ -17,14 +23,19 @@ export default function ImagePickerBox({
   return (
     <View>
       <TouchableOpacity style={styles.uploadBox} onPress={onAddImage}>
-        <Ionicons name="cloud-upload-outline" size={28} color={ADD_PRODUCT_COLORS.primary} />
+        <Ionicons
+          name="cloud-upload-outline"
+          size={28}
+          color={ADD_PRODUCT_COLORS.primary}
+        />
         <Text style={styles.uploadTitle}>Upload Product Images</Text>
         <Text style={styles.uploadSubTitle}>Tap to add image</Text>
       </TouchableOpacity>
 
       {images.map((item, index) => (
-        <View key={item} style={styles.imageRow}>
-          <Text style={styles.imageText}>{item}</Text>
+        <View key={`${item}-${index}`} style={styles.imageRow}>
+          <Image source={{ uri: item }} style={styles.image} />
+
           <TouchableOpacity onPress={() => onRemoveImage(index)}>
             <Text style={styles.removeText}>Remove</Text>
           </TouchableOpacity>
@@ -67,9 +78,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  imageText: {
-    fontSize: 14,
-    color: ADD_PRODUCT_COLORS.text,
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
   },
   removeText: {
     color: ADD_PRODUCT_COLORS.error,
