@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../config/firebaseConfig";
 import {
-    addMultipleItemsToCartFirebase,
-    removeItemFromCartFirebase,
-    subscribeToCart,
-    updateCartItemQuantity,
+  addMultipleItemsToCartFirebase,
+  removeItemFromCartFirebase,
+  subscribeToCart,
+  updateCartItemQuantity,
 } from "../services/cart.service";
 import { CartItemType } from "../types/cart";
 
@@ -16,73 +18,49 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Demo user للعرض
-const DEMO_USER_ID = "demo-user-123";
-
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItemType[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // مزامنة مع Firebase عند التحميل
   useEffect(() => {
-    const unsubscribe = subscribeToCart(DEMO_USER_ID, (items) => {
-      if (items.length > 0) {
-        setCartItems(items);
-      }
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      setUserId(user?.uid ?? null);
     });
-    return () => unsubscribe();
+
+    return () => unsubAuth();
   }, []);
 
-  const addToCart = (items: CartItemType[]) => {
-    // تحديث محلي
-    setCartItems((prev) => {
-      const updated = [...prev];
+  useEffect(() => {
+    if (!userId) {
+      setCartItems([]);
+      return;
+    }
 
-      items.forEach((newItem) => {
-        const existingIndex = updated.findIndex((item) => item.id === newItem.id);
-
-        if (existingIndex !== -1) {
-          updated[existingIndex] = {
-            ...updated[existingIndex],
-            qty: updated[existingIndex].qty + newItem.qty,
-          };
-        } else {
-          updated.push(newItem);
-        }
-      });
-
-      return updated;
+    const unsubscribe = subscribeToCart(userId, (items) => {
+      setCartItems(items);
     });
 
-    // مزامنة مع Firebase (بالخلفية)
-    addMultipleItemsToCartFirebase(DEMO_USER_ID, items);
+    return () => unsubscribe();
+  }, [userId]);
+
+  const addToCart = (items: CartItemType[]) => {
+    if (!userId) return;
+    addMultipleItemsToCartFirebase(userId, items);
   };
 
   const removeFromCart = (id: string) => {
-    // تحديث محلي
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-    
-    // مزامنة مع Firebase (بالخلفية)
-    removeItemFromCartFirebase(DEMO_USER_ID, id);
+    if (!userId) return;
+    removeItemFromCartFirebase(userId, id);
   };
 
   const changeQty = (id: string, type: "inc" | "dec") => {
-    // تحديث محلي
-    setCartItems((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const newQty = type === "inc" ? item.qty + 1 : item.qty - 1;
-          return { ...item, qty: newQty < 1 ? 1 : newQty };
-        }
-        return item;
-      })
-    );
+    if (!userId) return;
 
-    // مزامنة مع Firebase (بالخلفية)
     const item = cartItems.find((i) => i.id === id);
-    if (item) {
-      const newQty = type === "inc" ? item.qty + 1 : item.qty - 1;
-      updateCartItemQuantity(DEMO_USER_ID, id, newQty);
-    }
+    if (!item) return;
+
+    const newQty = type === "inc" ? item.qty + 1 : item.qty - 1;
+    updateCartItemQuantity(userId, id, Math.max(1, newQty));
   };
 
   return (
