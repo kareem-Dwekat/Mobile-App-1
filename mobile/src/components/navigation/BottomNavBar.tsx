@@ -2,18 +2,23 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomNavBarProps } from "../../types/navigation";
+import { useCart } from "../../hooks/CartContext";
 
 const BottomNavBar = ({
   activeTab = "home",
-  cartCount = 0,
   onHomePress,
   onCategoriesPress,
   onCartPress,
   onAccountPress,
 }: BottomNavBarProps) => {
+  const { cartItems } = useCart();
+
+  const cartCount = cartItems.reduce((total, item) => {
+    return total + (item.quantity || 1);
+  }, 0);
+
   return (
     <View style={styles.wrapper}>
-      {/* Home */}
       <TouchableOpacity style={styles.tab} onPress={onHomePress}>
         <Ionicons
           name="home-outline"
@@ -25,21 +30,17 @@ const BottomNavBar = ({
         </Text>
       </TouchableOpacity>
 
-      {/* Categories */}
       <TouchableOpacity style={styles.tab} onPress={onCategoriesPress}>
         <Ionicons
           name="grid-outline"
           size={24}
           color={activeTab === "categories" ? "#F97316" : "#7B8794"}
         />
-        <Text
-          style={[styles.label, activeTab === "categories" && styles.activeLabel]}
-        >
+        <Text style={[styles.label, activeTab === "categories" && styles.activeLabel]}>
           Categories
         </Text>
       </TouchableOpacity>
 
-      {/* Cart */}
       <TouchableOpacity style={styles.tab} onPress={onCartPress}>
         <View style={styles.iconBox}>
           <Ionicons
@@ -60,16 +61,13 @@ const BottomNavBar = ({
         </Text>
       </TouchableOpacity>
 
-      {/* Account */}
       <TouchableOpacity style={styles.tab} onPress={onAccountPress}>
         <Ionicons
           name="person-outline"
           size={24}
           color={activeTab === "account" ? "#F97316" : "#7B8794"}
         />
-        <Text
-          style={[styles.label, activeTab === "account" && styles.activeLabel]}
-        >
+        <Text style={[styles.label, activeTab === "account" && styles.activeLabel]}>
           Account
         </Text>
       </TouchableOpacity>
