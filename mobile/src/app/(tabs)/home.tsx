@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
 
 import CategoriesRow from "../../components/HomeScreen/CategoriesRow";
 import FilterModal from "../../components/HomeScreen/FilterModal";
@@ -55,7 +56,6 @@ export default function Home() {
     try {
       setLoading(true);
       const data = await getProductsFromFirestore();
-      console.log("Firestore products:", data);
       setProducts(data as ProductItem[]);
     } catch (error) {
       console.log("Load products error:", error);
@@ -132,7 +132,18 @@ export default function Home() {
                 <SectionHeader title="Featured Products" actionText="See all" />
               </>
             }
-            renderItem={({ item }) => <ProductCard item={item} />}
+            renderItem={({ item }) => (
+              <ProductCard
+              item={item}
+              onPress={() =>
+                router.push({
+                  pathname: "/ProductDetailsScreen",
+                  params: { id: item.id },
+                })
+              }
+              onHeartPress={(id) => console.log("liked product:", id)}
+            />
+            )}
             ListEmptyComponent={
               <Text style={styles.emptyText}>No products found</Text>
             }

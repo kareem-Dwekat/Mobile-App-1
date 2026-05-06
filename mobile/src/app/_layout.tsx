@@ -9,7 +9,7 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <ActionSheetProvider> 
+      <ActionSheetProvider>
         <CartProvider>
           <>
             <Stack
@@ -22,6 +22,7 @@ export default function RootLayout() {
               <Stack.Screen name="login" options={{ headerShown: false }} />
               <Stack.Screen name="payment" options={{ headerShown: false }} />
               <Stack.Screen name="add-product" options={{ headerShown: false }} />
+              <Stack.Screen name="product-details" options={{ headerShown: false }} />
               <Stack.Screen name="ShippingAddressScreen" options={{ headerShown: false }} />
               <Stack.Screen name="myOrders" options={{ headerShown: false }} />
               <Stack.Screen name="review-order" options={{ headerShown: false }} />
