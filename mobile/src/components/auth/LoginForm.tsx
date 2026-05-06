@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { AUTH_COLORS } from "../../constants/auth";
 import { LoginFormProps } from "../../types/auth";
 
@@ -23,8 +22,6 @@ export default function LoginForm({
   onForgotPassword,
   onGoToSignup,
 }: LoginFormProps) {
-  const [showPassword, setShowPassword] = useState(false);
-
   return (
     <View style={styles.card}>
       <Image
@@ -47,31 +44,15 @@ export default function LoginForm({
       />
       {!!errors.email && <Text style={styles.error}>{errors.email}</Text>}
 
-      <View
-        style={[
-          styles.passwordContainer,
-          errors.password ? styles.inputError : null,
-        ]}
-      >
-        <TextInput
-          placeholder="Enter your password"
-          secureTextEntry={!showPassword}
-          style={styles.passwordInput}
-          value={password}
-          onChangeText={onChangePassword}
-          returnKeyType="done"
-          onSubmitEditing={onSubmit}
-        />
-
-        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          <Ionicons
-            name={showPassword ? "eye-off-outline" : "eye-outline"}
-            size={22}
-            color="#777"
-          />
-        </TouchableOpacity>
-      </View>
-
+      <TextInput
+        placeholder="Enter your password"
+        secureTextEntry
+        style={[styles.input, errors.password ? styles.inputError : null]}
+        value={password}
+        onChangeText={onChangePassword}
+        returnKeyType="done"
+        onSubmitEditing={onSubmit}
+      />
       {!!errors.password && <Text style={styles.error}>{errors.password}</Text>}
 
       <TouchableOpacity
@@ -131,20 +112,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: AUTH_COLORS.border,
-  },
-  passwordContainer: {
-    backgroundColor: AUTH_COLORS.inputBg,
-    borderRadius: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: AUTH_COLORS.border,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  passwordInput: {
-    flex: 1,
-    paddingVertical: 14,
   },
   inputError: {
     borderColor: AUTH_COLORS.error,
