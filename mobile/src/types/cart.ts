@@ -6,4 +6,5 @@ export interface CartItemType {
     price: number;
     image: string;
     qty: number;
+    selected: boolean,
   }

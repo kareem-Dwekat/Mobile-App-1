@@ -12,25 +12,42 @@ import {
 
 import { useCart } from "../../hooks/CartContext";
 import { useWishlist } from "../../hooks/useWishlist";
-import { WishlistItemType } from "../../types/wishlist";
+import type { WishlistItemType } from "../../types/wishlist";
+import type { CartItemType } from "../../types/cart";
 
 export default function Wishlist() {
   const { addToCart } = useCart();
+
   const {
     items,
     toggleSelect,
     changeQty,
     toggleSelectAll,
     handleDeleteSelected,
-    handleAddToCart,
   } = useWishlist();
 
   const onAddToCart = () => {
-    handleAddToCart(addToCart);
+    const selectedItems = items.filter((item) => item.selected);
+
+    if (selectedItems.length === 0) {
+      return;
+    }
+
+    const cartItems: CartItemType[] = selectedItems.map((item) => ({
+      id: item.id,
+      title: item.title,
+      category: item.category,
+      price: item.price,
+      image: item.image,
+      qty: item.qty,
+      quantity: item.qty,
+      selected: true,
+    }));
+
+    addToCart(cartItems);
+
     router.push("/(tabs)/cart");
   };
-
-  // @ts-ignore - Firebase sync in background
 
   const renderItem = ({ item }: { item: WishlistItemType }) => (
     <View style={styles.card}>
@@ -48,7 +65,9 @@ export default function Wishlist() {
         <Text style={styles.title} numberOfLines={2}>
           {item.title}
         </Text>
+
         <Text style={styles.category}>{item.category}</Text>
+
         <Text style={styles.price}>$ {item.price}</Text>
       </View>
 
@@ -67,6 +86,7 @@ export default function Wishlist() {
   );
 
   const allSelected = items.length > 0 && items.every((item) => item.selected);
+  const hasSelected = items.some((item) => item.selected);
 
   return (
     <View style={styles.container}>
@@ -78,6 +98,9 @@ export default function Wishlist() {
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No items in wishlist</Text>
+        }
       />
 
       <View style={styles.bottom}>
@@ -87,17 +110,23 @@ export default function Wishlist() {
               <Ionicons name="checkmark" size={14} color="#fff" />
             )}
           </View>
+
           <Text style={styles.selectAllText}>Select all</Text>
         </TouchableOpacity>
 
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.cartBtn} onPress={onAddToCart}>
+          <TouchableOpacity
+            style={[styles.cartBtn, !hasSelected && styles.disabledBtn]}
+            onPress={onAddToCart}
+            disabled={!hasSelected}
+          >
             <Text style={styles.cartText}>Add to Cart</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.deleteBtn}
+            style={[styles.deleteBtn, !hasSelected && styles.disabledBtn]}
             onPress={handleDeleteSelected}
+            disabled={!hasSelected}
           >
             <Text style={styles.deleteText}>Delete</Text>
           </TouchableOpacity>
@@ -122,6 +151,12 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 140,
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 40,
+    fontSize: 15,
+    color: "#777",
   },
   card: {
     flexDirection: "row",
@@ -241,5 +276,8 @@ const styles = StyleSheet.create({
   deleteText: {
     color: "#fff",
     fontWeight: "700",
+  },
+  disabledBtn: {
+    opacity: 0.4,
   },
 });
