@@ -4,7 +4,7 @@ export const MOCK_ADDRESSES: Address[] = [
   {
     id: "1",
     title: "Shipping address",
-    street: "210 Collins Street",
+    addressLine1: "210 Collins Street",
     city: "Melbourne",
     state: "Victoria (VIC)",
     country: "Australia",
@@ -14,7 +14,7 @@ export const MOCK_ADDRESSES: Address[] = [
   {
     id: "2",
     title: "Shipping Address",
-    street: "45 George Street",
+    addressLine1: "45 George Street",
     city: "Geelong",
     state: "Victoria (VIC)",
     country: "Australia",
@@ -24,7 +24,7 @@ export const MOCK_ADDRESSES: Address[] = [
   {
     id: "3",
     title: "Shipping address",
-    street: "25 George Street",
+    addressLine1: "25 George Street",
     city: "Newcastle",
     state: "New South Wales (NSW)",
     country: "Australia",

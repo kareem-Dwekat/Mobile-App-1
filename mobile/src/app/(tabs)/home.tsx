@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
 
 import CategoriesRow from "../../components/HomeScreen/CategoriesRow";
 import FilterModal from "../../components/HomeScreen/FilterModal";
@@ -17,7 +16,7 @@ import PromoBanner from "../../components/HomeScreen/PromoBanner";
 import SearchSection from "../../components/HomeScreen/SearchSection";
 import SectionHeader from "../../components/HomeScreen/SectionHeader";
 
-import { initialWishlistData } from "../../constants/wishlist";
+import { useWishlist } from "../../hooks/useWishlist";
 import { getProductsFromFirestore } from "../../services/product.service";
 
 type ProductItem = {
@@ -39,6 +38,7 @@ const normalizeCategory = (category?: string) => {
 
 export default function Home() {
   const insets = useSafeAreaInsets();
+  const { items: wishlistItems } = useWishlist();
 
   const [search, setSearch] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
@@ -57,7 +57,9 @@ export default function Home() {
 
   const PAGE_SIZE = 10;
 
-  const wishlistCount = initialWishlistData.length;
+  const wishlistCount = wishlistItems.reduce((total, item) => {
+    return total + item.qty;
+  }, 0);
 
   const loadProducts = async () => {
     try {
@@ -87,21 +89,17 @@ export default function Home() {
         .includes(search.toLowerCase());
 
       const matchesPrice = Number(item.price) <= maxPrice;
-
       const itemCategory = normalizeCategory(item.category);
 
       const matchesCategory =
-        selectedCategory === "All" ||
-        itemCategory === selectedCategory;
+        selectedCategory === "All" || itemCategory === selectedCategory;
 
       return matchesSearch && matchesPrice && matchesCategory;
     });
   }, [products, search, selectedCategory, maxPrice]);
 
   const randomProducts = useMemo(() => {
-    return [...filteredProducts]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 10);
+    return [...filteredProducts].sort(() => Math.random() - 0.5).slice(0, 10);
   }, [filteredProducts]);
 
   const displayedProducts = useMemo(() => {
@@ -157,11 +155,7 @@ export default function Home() {
 
                 <SectionHeader title="Categories" />
 
-                <CategoriesRow
-                  onSelectCategory={(category) => {
-                    setSelectedCategory(category);
-                  }}
-                />
+                <CategoriesRow onSelectCategory={setSelectedCategory} />
 
                 <PromoBanner />
 
@@ -175,18 +169,7 @@ export default function Home() {
                 />
               </>
             }
-            renderItem={({ item }) => (
-              <ProductCard
-                item={item}
-                onPress={() =>
-                  router.push({
-                    pathname: "/ProductDetailsScreen",
-                    params: { id: item.id },
-                  })
-                }
-                onHeartPress={(id) => console.log("liked product:", id)}
-              />
-            )}
+            renderItem={({ item }) => <ProductCard item={item} />}
             ListEmptyComponent={
               <Text style={styles.emptyText}>No products found</Text>
             }

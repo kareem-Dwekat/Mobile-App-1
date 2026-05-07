@@ -1,54 +1,93 @@
-import React, { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React from "react";
 import {
-  View,
-  Text,
   Image,
   StyleSheet,
-  useWindowDimensions,
+  Text,
   TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
-interface Props {
-  item: {
-    id: string;
-    productName?: string;
-    price?: number;
-    category?: string;
-    brand?: string;
-    images?: string[];
-  };
-  onPress?: () => void;
-  onHeartPress?: (id: string) => void;
-}
+import { useWishlist } from "../../hooks/useWishlist";
+import type { WishlistItemType } from "../../types/wishlist";
 
-const ProductCard = ({ item, onPress, onHeartPress }: Props) => {
-  const [liked, setLiked] = useState(false);
+type ProductItemType = {
+  id: string;
+  productName?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  category?: string;
+  brand?: string;
+  images?: string[];
+};
 
+type Props = {
+  item: ProductItemType;
+};
+
+const ProductCard = ({ item }: Props) => {
   const { width } = useWindowDimensions();
+  const { items: wishlistItems, addToWishlist, removeFromWishlist } =
+    useWishlist();
+
   const cardWidth = (width - 16 * 2 - 12) / 2;
   const imageHeight = cardWidth * 1.05;
   const isSmallDevice = width < 375;
 
-  const title = item?.productName || "No Title";
-  const price = item?.price ?? 0;
-  const category = item?.category || "No Category";
-  const brand = item?.brand || "";
+  const title = item.productName ?? "No Title";
+  const price = item.price ?? 0;
+  const category = item.category ?? "No Category";
+  const brand = item.brand ?? "";
   const imageSource =
-    item?.images && item.images.length > 0
+    item.images && item.images.length > 0
       ? item.images[0]
       : "https://via.placeholder.com/300x300.png?text=No+Image";
 
-  const handleHeartPress = () => {
-    setLiked(!liked);
-    onHeartPress?.(item.id);
+  const isInWishlist = wishlistItems.some((wishItem) => wishItem.id === item.id);
+
+  const handlePress = () => {
+    router.push({
+      pathname: "../product-detail",
+      params: {
+        id: item.id,
+        productName: item.productName ?? "",
+        description: item.description ?? "",
+        price: String(item.price ?? 0),
+        stock: String(item.stock ?? 0),
+        category: item.category ?? "",
+        brand: item.brand ?? "",
+        images: JSON.stringify(item.images ?? []),
+      },
+    });
+  };
+
+  const handleWishlistPress = () => {
+    if (isInWishlist) {
+      removeFromWishlist(item.id);
+      return;
+    }
+
+    const wishlistItem: WishlistItemType = {
+      id: item.id,
+      title,
+      category,
+      price,
+      image: imageSource,
+      qty: 1,
+      selected: false,
+    };
+
+    addToWishlist(wishlistItem);
   };
 
   return (
     <TouchableOpacity
       style={[styles.card, { width: cardWidth }]}
       activeOpacity={0.9}
-      onPress={onPress}
+      onPress={handlePress}
     >
       <View>
         <Image
@@ -57,15 +96,11 @@ const ProductCard = ({ item, onPress, onHeartPress }: Props) => {
           resizeMode="cover"
         />
 
-        <TouchableOpacity
-          style={[styles.heart, liked && styles.heartActive]}
-          onPress={handleHeartPress}
-          activeOpacity={0.8}
-        >
+        <TouchableOpacity style={styles.heart} onPress={handleWishlistPress}>
           <Ionicons
-            name={liked ? "heart" : "heart-outline"}
-            size={17}
-            color="#fff"
+            name={isInWishlist ? "heart" : "heart-outline"}
+            size={16}
+            color={isInWishlist ? "#FF6B00" : "#fff"}
           />
         </TouchableOpacity>
       </View>
@@ -117,10 +152,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
     padding: 6,
     borderRadius: 20,
-    zIndex: 5,
-  },
-  heartActive: {
-    backgroundColor: "#ff3b30",
   },
   title: {
     fontWeight: "600",
