@@ -8,20 +8,23 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useWishlist } from "../../hooks/useWishlist";
 
 interface Props {
   item: {
     id: string;
     productName?: string;
+    description?: string;
     price?: number;
+    stock?: number;
     category?: string;
     brand?: string;
     images?: string[];
   };
-  onPress?: () => void;
 }
 
-const ProductCard = ({ item, onPress }: Props) => {
+const ProductCard = ({ item }: Props) => {
   const { width } = useWindowDimensions();
   const cardWidth = (width - 16 * 2 - 12) / 2;
   const imageHeight = cardWidth * 1.05;
@@ -36,11 +39,49 @@ const ProductCard = ({ item, onPress }: Props) => {
       ? item.images[0]
       : "https://via.placeholder.com/300x300.png?text=No+Image";
 
+  const handlePress = () => {
+    router.push({
+      pathname: "/product-detail",
+      params: {
+        id: item.id,
+        productName: item.productName ?? "",
+        description: item.description ?? "",
+        price: String(item.price ?? 0),
+        stock: String(item.stock ?? 0),
+        category: item.category ?? "",
+        brand: item.brand ?? "",
+        images: JSON.stringify(item.images ?? []),
+      },
+    });
+  };
+
+  const { items: wishlistItems, addToWishlist, removeFromWishlist } = useWishlist();
+  const isInWishlist = wishlistItems.some((i) => i.id === item.id);
+
+  const handleWishlistPress = (e: any) => {
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
+    if (isInWishlist) {
+      removeFromWishlist(item.id);
+    } else {
+      addToWishlist({
+        id: item.id,
+        title: item.productName ?? "",
+        category: item.category ?? "",
+        price: item.price ?? 0,
+        image: imageSource,
+        qty: 1,
+        selected: false,
+      });
+    }
+  };
+
   return (
     <TouchableOpacity
       style={[styles.card, { width: cardWidth }]}
       activeOpacity={0.9}
-      onPress={onPress}
+      onPress={handlePress}
     >
       <View>
         <Image
@@ -49,9 +90,9 @@ const ProductCard = ({ item, onPress }: Props) => {
           resizeMode="cover"
         />
 
-        <View style={styles.heart}>
-          <Ionicons name="heart-outline" size={16} color="#fff" />
-        </View>
+        <TouchableOpacity style={styles.heart} onPress={handleWishlistPress}>
+          <Ionicons name={isInWishlist ? "heart" : "heart-outline"} size={16} color={isInWishlist ? "#FF6B00" : "#fff"} />
+        </TouchableOpacity>
       </View>
 
       <Text

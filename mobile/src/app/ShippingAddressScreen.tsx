@@ -21,6 +21,7 @@ export default function ShippingAddressScreen() {
   useEffect(() => {
     const title = getParamValue(params.title);
     const country = getParamValue(params.country);
+    const state = getParamValue(params.state);
     const city = getParamValue(params.city);
     const addressLine1 = getParamValue(params.addressLine1);
     const addressLine2 = getParamValue(params.addressLine2);
@@ -32,6 +33,7 @@ export default function ShippingAddressScreen() {
       addAddress({
         title,
         country,
+        state,
         city,
         addressLine1,
         addressLine2,
@@ -43,6 +45,7 @@ export default function ShippingAddressScreen() {
   }, [
     params.title,
     params.country,
+    params.state,
     params.city,
     params.addressLine1,
     params.addressLine2,
