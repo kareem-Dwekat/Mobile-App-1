@@ -1,21 +1,35 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  useWindowDimensions,
+} from "react-native";
 
 interface Props {
   title: string;
   actionText?: string;
+  onPress?: () => void;
 }
 
-const SectionHeader = ({ title, actionText }: Props) => {
+const SectionHeader = ({ title, actionText, onPress }: Props) => {
   const { width } = useWindowDimensions();
   const isSmallDevice = width < 375;
 
   return (
     <View style={styles.row}>
-      <Text style={[styles.title, { fontSize: isSmallDevice ? 17 : 18 }]}>{title}</Text>
+      <Text style={[styles.title, { fontSize: isSmallDevice ? 17 : 18 }]}>
+        {title}
+      </Text>
+
       {actionText ? (
-        <TouchableOpacity>
-          <Text style={[styles.action, { fontSize: isSmallDevice ? 14 : 16 }]}>{actionText}</Text>
+        <TouchableOpacity onPress={onPress}>
+          <Text
+            style={[styles.action, { fontSize: isSmallDevice ? 14 : 16 }]}
+          >
+            {actionText}
+          </Text>
         </TouchableOpacity>
       ) : null}
     </View>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -6,123 +6,270 @@ import {
   FlatList,
   TouchableOpacity,
   SafeAreaView,
+  ActivityIndicator,
+  useWindowDimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
-const categoriesData = [
-  { id: "1", title: "Electronics", icon: "phone-portrait-outline" },
-  { id: "2", title: "Fashion", icon: "shirt-outline" },
-  { id: "3", title: "Home", icon: "home-outline" },
-  { id: "4", title: "Beauty", icon: "sparkles-outline" },
-  { id: "5", title: "Sports", icon: "barbell-outline" },
-  { id: "6", title: "Books", icon: "book-outline" },
-  { id: "7", title: "Toys", icon: "game-controller-outline" },
-  { id: "8", title: "Groceries", icon: "basket-outline" },
-];
+import { getProductsFromFirestore } from "@/services/product.service";
+import ProductCard from "@/components/HomeScreen/ProductCard";
+
+type ProductItem = {
+  id: string;
+  productName: string;
+  price: number;
+  category: string;
+  images?: string[];
+};
 
 export default function CategoriesScreen() {
-  const handlePressCategory = (category: string) => {
-    router.push({
-      pathname: "/(tabs)/home",
-      params: { category },
-    });
+  const { width } = useWindowDimensions();
+  const cardWidth = width >= 768 ? "30%" : "47%";
+
+  const [products, setProducts] = useState<ProductItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const load = async () => {
+    try {
+      const data = await getProductsFromFirestore();
+      setProducts(data as ProductItem[]);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const normalize = (t?: string) =>
+    (t ?? "").toLowerCase().trim();
+
+  const categories = useMemo(() => {
+    const map: Record<string, ProductItem[]> = {};
+
+    products.forEach((p) => {
+      const key = normalize(p.category);
+      if (!map[key]) map[key] = [];
+      map[key].push(p);
+    });
+
+    return Object.keys(map).map((key) => {
+      const items = map[key];
+      const prices = items.map((i) => i.price);
+
+      return {
+        title: items[0]?.category || key,
+        count: items.length,
+        min: Math.min(...prices),
+        max: Math.max(...prices),
+      };
+    });
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    if (!selectedCategory) return [];
+
+    return products.filter(
+      (p) =>
+        normalize(p.category) === normalize(selectedCategory)
+    );
+  }, [products, selectedCategory]);
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#FF6A00" />
+      </View>
+    );
+  }
+
+  if (!selectedCategory) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+
+          <Text style={styles.title}>Categories</Text>
+          <Text style={styles.subtitle}>
+            Tap a category to view products
+          </Text>
+
+          <FlatList
+            data={categories}
+            numColumns={2}
+            columnWrapperStyle={styles.row}
+            keyExtractor={(item) => item.title}
+            contentContainerStyle={{ paddingBottom: 30 }}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[styles.card, { width: cardWidth }]}
+                activeOpacity={0.85}
+                onPress={() => setSelectedCategory(item.title)}
+              >
+                <View style={styles.iconBox}>
+                  <Ionicons
+                    name="pricetag-outline"
+                    size={26}
+                    color="#FF6A00"
+                  />
+                </View>
+
+                <Text style={styles.cardTitle}>
+                  {item.title}
+                </Text>
+
+                <Text style={styles.cardSub}>
+                  {item.count} products
+                </Text>
+
+                <Text style={styles.price}>
+                  ${item.min} - ${item.max}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Categories</Text>
-        <Text style={styles.subtitle}>Browse products by category</Text>
 
+        {/* BACK HEADER */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => setSelectedCategory(null)}
+          >
+            <Ionicons name="arrow-back" size={24} />
+          </TouchableOpacity>
+
+          <Text style={styles.headerTitle}>
+            {selectedCategory}
+          </Text>
+
+          <View style={{ width: 24 }} />
+        </View>
+
+        {/* PRODUCTS */}
         <FlatList
-          data={categoriesData}
+          data={filteredProducts}
           keyExtractor={(item) => item.id}
           numColumns={2}
-          columnWrapperStyle={styles.row}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
+          columnWrapperStyle={styles.productRow}
+          contentContainerStyle={{ paddingBottom: 30 }}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.card}
-              activeOpacity={0.85}
-              onPress={() => handlePressCategory(item.title)}
-            >
-              <View style={styles.iconBox}>
-                <Ionicons name={item.icon as any} size={30} color="#FF6A00" />
-              </View>
-
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardSub}>View items</Text>
-            </TouchableOpacity>
+            <ProductCard
+              item={item}
+              onPress={() =>
+                router.push({
+                  pathname: "/ProductDetailsScreen",
+                  params: { id: item.id },
+                })
+              }
+            />
           )}
+          ListEmptyComponent={
+            <Text style={styles.empty}>
+              No products found
+            </Text>
+          }
         />
       </View>
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#F7F7F7",
   },
+
   container: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    padding: 16,
   },
+
   title: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 6,
+    fontSize: 26,
+    fontWeight: "800",
   },
+
   subtitle: {
-    fontSize: 15,
-    color: "#6B7280",
-    marginBottom: 22,
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 16,
   },
-  listContent: {
-    paddingBottom: 30,
-  },
+
   row: {
     justifyContent: "space-between",
-    marginBottom: 14,
+    marginBottom: 12,
   },
+
+  productRow: {
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+
   card: {
-    width: "48%",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    paddingVertical: 24,
-    paddingHorizontal: 16,
+    backgroundColor: "#fff",
+    borderRadius: 18,
+    padding: 14,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ECECEC",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
+
   iconBox: {
-    width: 62,
-    height: 62,
-    borderRadius: 18,
+    width: 52,
+    height: 52,
+    borderRadius: 14,
     backgroundColor: "#FFF1E8",
-    alignItems: "center",
     justifyContent: "center",
-    marginBottom: 14,
+    alignItems: "center",
+    marginBottom: 10,
   },
+
   cardTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
-    color: "#111827",
-    marginBottom: 4,
-    textAlign: "center",
   },
+
   cardSub: {
-    fontSize: 13,
-    color: "#6B7280",
+    fontSize: 12,
+    color: "#666",
+  },
+
+  price: {
+    fontSize: 12,
+    color: "#FF6A00",
+    marginTop: 5,
+  },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+
+  empty: {
+    textAlign: "center",
+    marginTop: 20,
+    color: "#666",
+  },
+
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

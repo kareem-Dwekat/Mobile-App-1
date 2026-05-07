@@ -4,7 +4,11 @@ import CategoryItem from "./CategoryItem";
 import { getCategories } from "@/services/categoryService";
 import { CategoryItemType } from "@/types/category";
 
-const CategoriesRow = () => {
+type Props = {
+  onSelectCategory?: (category: string) => void;
+};
+
+const CategoriesRow = ({ onSelectCategory }: Props) => {
   const [categories, setCategories] = useState<CategoryItemType[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,9 +34,14 @@ const CategoriesRow = () => {
       horizontal
       data={categories}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <CategoryItem item={item} />}
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ paddingRight: 8 }}
+      renderItem={({ item }) => (
+        <CategoryItem
+          item={item}
+          onPress={() => onSelectCategory?.(item.title)}
+        />
+      )}
     />
   );
 };
