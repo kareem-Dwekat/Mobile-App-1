@@ -9,6 +9,7 @@ export type ShippingAddress = {
 };
 
 export type PaymentSummary = {
+  subtotal?: number;
   vat: number;
   shippingCosts: number;
   totalPayment: number;

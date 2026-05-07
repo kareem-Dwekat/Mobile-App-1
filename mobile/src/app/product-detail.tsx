@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useCart } from "../hooks/CartContext";
 import { useWishlist } from "../hooks/useWishlist";
 import { CartItemType } from "../types/cart";
+import { WishlistItemType } from "../types/wishlist";
 
 const { width } = Dimensions.get("window");
 
@@ -67,7 +68,7 @@ export default function ProductDetail() {
   };
 
   const handleWishlist = () => {
-    const wishlistItem: CartItemType = {
+    const wishlistItem: WishlistItemType = {
       id: productId,
       title: productName,
       category,
@@ -75,7 +76,6 @@ export default function ProductDetail() {
       image: images[0] ?? "",
       qty: 1,
       selected: false,
-      quantity: 0
     };
 
     addToWishlist(wishlistItem);

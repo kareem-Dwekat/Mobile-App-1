@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useState } from "react";
 import {
@@ -13,24 +12,16 @@ import {
 
 type ProfileImageProps = {
   name?: string;
+  imageUri?: string;
+  onImageChange?: (imageUri: string, base64?: string) => Promise<void> | void;
 };
 
-const STORAGE_KEY = "profile_image_uri";
-
-const ProfileImage = ({ name = "User" }: ProfileImageProps) => {
-  const [selectedImage, setSelectedImage] = useState<string | undefined>();
+const ProfileImage = ({ name = "User", imageUri, onImageChange }: ProfileImageProps) => {
+  const [previewUri, setPreviewUri] = useState(imageUri);
 
   useEffect(() => {
-    const loadImage = async () => {
-      const savedImage = await AsyncStorage.getItem(STORAGE_KEY);
-
-      if (savedImage) {
-        setSelectedImage(savedImage);
-      }
-    };
-
-    loadImage();
-  }, []);
+    setPreviewUri((currentPreview) => imageUri || currentPreview);
+  }, [imageUri]);
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -41,25 +32,27 @@ const ProfileImage = ({ name = "User" }: ProfileImageProps) => {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.8,
+      quality: 0.5,
+      base64: true,
     });
 
     if (result.canceled) return;
 
-    const imageUri = result.assets[0].uri;
+    const selectedAsset = result.assets[0];
+    const selectedImageUri = selectedAsset.uri;
 
-    setSelectedImage(imageUri);
-    await AsyncStorage.setItem(STORAGE_KEY, imageUri);
+    setPreviewUri(selectedImageUri);
+    await onImageChange?.(selectedImageUri, selectedAsset.base64 ?? undefined);
   };
 
   return (
     <View style={styles.imageWrapper}>
       <View style={styles.imageContainer}>
-        {selectedImage ? (
-          <Image source={{ uri: selectedImage }} style={styles.image} />
+        {previewUri ? (
+          <Image source={{ uri: previewUri }} style={styles.image} />
         ) : (
           <View style={styles.placeholder}>
             <Ionicons name="person-outline" size={42} color="#9ca3af" />

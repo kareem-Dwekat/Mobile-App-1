@@ -3,6 +3,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  updateProfile,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/config/firebaseConfig";
@@ -59,9 +60,19 @@ export const signupUser = async (
 
   const user = userCredential.user;
 
+  await updateProfile(user, {
+    displayName: fullName,
+  });
+
   await setDoc(doc(db, "users", user.uid), {
     fullName,
     email: email.trim(),
+    photoURL: "",
+    zipCode: "5000",
+    address: "Dhaka",
+    city: "Melbourne",
+    state: "Victoria (VIC)",
+    country: "Australia",
     createdAt: new Date().toISOString(),
   });
 

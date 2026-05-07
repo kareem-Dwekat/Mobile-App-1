@@ -17,7 +17,14 @@ export default function TotalCard({ summary }: Props) {
       </View>
 
       <View style={styles.row}>
-        <Text style={styles.label}>Vat</Text>
+        <Text style={styles.label}>Products Total</Text>
+        <Text style={styles.value}>
+          {(summary.subtotal ?? summary.totalPayment).toFixed(2)} $
+        </Text>
+      </View>
+
+      <View style={styles.row}>
+        <Text style={styles.label}>VAT</Text>
         <Text style={styles.value}>{summary.vat.toFixed(2)} $</Text>
       </View>
 

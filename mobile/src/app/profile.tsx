@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -23,10 +24,11 @@ import {
 } from "@/constants/Profile";
 
 import { ProfileFormData } from "@/types/profile";
-import { auth } from "@/config/firebaseConfig";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { profile, updateProfileData, updatePhoto } = useUserProfile();
 
   const [form, setForm] = useState<ProfileFormData>({
     email: "",
@@ -38,18 +40,20 @@ export default function ProfileScreen() {
     country: "Australia",
     accountHolderName: "customers",
   });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const user = auth.currentUser;
-
-    if (user) {
-      setForm((prev) => ({
-        ...prev,
-        email: user.email ?? "",
-        accountHolderName: user.displayName ?? prev.accountHolderName,
-      }));
-    }
-  }, []);
+    setForm((prev) => ({
+      ...prev,
+      email: profile.email,
+      zipCode: profile.zipCode,
+      address: profile.address,
+      city: profile.city,
+      state: profile.state,
+      country: profile.country,
+      accountHolderName: profile.fullName,
+    }));
+  }, [profile]);
 
   const handleChange = (key: keyof ProfileFormData, value: string) => {
     setForm((prev) => ({
@@ -58,8 +62,41 @@ export default function ProfileScreen() {
     }));
   };
 
-  const handleConfirm = () => {
-    console.log("Saved Data:", form);
+  const handleConfirm = async () => {
+    if (saving) return;
+
+    try {
+      setSaving(true);
+
+      await updateProfileData({
+        fullName: form.accountHolderName,
+        email: form.email,
+        photoURL: profile.photoURL,
+        zipCode: form.zipCode,
+        address: form.address,
+        city: form.city,
+        state: form.state,
+        country: form.country,
+      });
+
+      Alert.alert("Success", "Profile updated successfully");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update profile";
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleImageChange = async (imageUri: string, base64?: string) => {
+    try {
+      await updatePhoto(imageUri, base64);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update image";
+      Alert.alert("Error", errorMessage);
+    }
   };
 
   return (
@@ -77,7 +114,11 @@ export default function ProfileScreen() {
           <Text style={styles.headerTitle}>Profile</Text>
         </View>
 
-        <ProfileImage name={form.accountHolderName} />
+        <ProfileImage
+          name={form.accountHolderName}
+          imageUri={profile.photoURL}
+          onImageChange={handleImageChange}
+        />
 
         <SectionTitle title="Personal Details" />
 
@@ -87,7 +128,6 @@ export default function ProfileScreen() {
           onChangeText={(text) => handleChange("email", text)}
           keyboardType="email-address"
           autoCapitalize="none"
-          editable={false}
         />
 
         <ProfileInput
@@ -145,7 +185,9 @@ export default function ProfileScreen() {
         />
 
         <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-          <Text style={styles.confirmText}>Confirm</Text>
+          <Text style={styles.confirmText}>
+            {saving ? "Saving..." : "Confirm"}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

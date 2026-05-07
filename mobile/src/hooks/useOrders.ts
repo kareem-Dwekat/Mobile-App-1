@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { getOrders } from "../services/orders.service";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../config/firebaseConfig";
+import { subscribeToOrders } from "../services/orders.service";
 import { OrderItemType, OrdersTabType } from "../types/order";
 
 export const useOrders = () => {
@@ -9,19 +11,29 @@ export const useOrders = () => {
   const [expandedOrderId, setExpandedOrderId] = useState<string>("");
 
   useEffect(() => {
-    const loadOrders = async () => {
-      try {
-        setLoading(true);
-        const data = await getOrders();
-        setOrders(data);
-      } catch (error) {
-        console.log("Failed to load orders:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    let unsubscribeOrders: (() => void) | undefined;
 
-    loadOrders();
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      unsubscribeOrders?.();
+      unsubscribeOrders = undefined;
+
+      if (!user) {
+        setOrders([]);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      unsubscribeOrders = subscribeToOrders(user.uid, (data) => {
+        setOrders(data);
+        setLoading(false);
+      });
+    });
+
+    return () => {
+      unsubscribeOrders?.();
+      unsubAuth();
+    };
   }, []);
 
   const tabs: OrdersTabType[] = useMemo(() => {

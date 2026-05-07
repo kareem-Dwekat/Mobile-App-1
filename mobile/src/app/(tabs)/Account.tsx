@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, Alert, ScrollView } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -6,7 +6,8 @@ import { router } from "expo-router";
 import ProfileHeader from "../../components/AccountComponents/AccountHeader";
 import ProfileImage from "../../components/AccountComponents/AccountImage";
 import MenuItem from "../../components/AccountComponents/MenuItem";
-import { getCurrentUserName, logoutUser } from "@/services/auth.service";
+import { logoutUser } from "@/services/auth.service";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 const PROFILE_MENU_ITEMS = [
   { title: "My Orders", icon: "receipt-outline" },
@@ -20,32 +21,18 @@ const PROFILE_MENU_ITEMS = [
 
 const ProfileScreen = () => {
   const insets = useSafeAreaInsets();
-  const [profileName, setProfileName] = useState("User");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { profile, updatePhoto } = useUserProfile();
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadProfileName = async () => {
-      try {
-        const currentUserName = await getCurrentUserName();
-
-        if (isMounted) {
-          setProfileName(currentUserName);
-        }
-      } catch {
-        if (isMounted) {
-          setProfileName("User");
-        }
-      }
-    };
-
-    loadProfileName();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const handleImageChange = async (imageUri: string, base64?: string) => {
+    try {
+      await updatePhoto(imageUri, base64);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update image";
+      Alert.alert("Error", errorMessage);
+    }
+  };
 
   const handleLogout = async () => {
     if (isLoggingOut) {
@@ -114,8 +101,9 @@ const ProfileScreen = () => {
         <ProfileHeader onBackPress={() => router.back()} />
 
         <ProfileImage
-          name={profileName}
-         
+          name={profile.fullName}
+          imageUri={profile.photoURL}
+          onImageChange={handleImageChange}
         />
 
         <View style={styles.menu}>

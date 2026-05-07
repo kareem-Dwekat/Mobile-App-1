@@ -1,10 +1,10 @@
 export interface CartItemType {
-    quantity: number;
+    quantity?: number;
     id: string;
     title: string;
     category: string;
     price: number;
     image: string;
     qty: number;
-    selected: boolean,
+    selected?: boolean,
   }

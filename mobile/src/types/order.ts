@@ -1,11 +1,19 @@
+import { CartItemType } from "./cart";
+import { PaymentMethod, ShippingAddress } from "./payment";
+
 export type OrderStatus = "Pending" | "Delivered" | "Cancelled";
 
 export interface OrderItemType {
   id: string;
+  userId: string;
   date: string;
   items: number;
   amount: number;
   status: OrderStatus;
+  products: CartItemType[];
+  paymentMethod: PaymentMethod;
+  shippingAddress: ShippingAddress;
+  createdAt: string;
 }
 
 export interface OrdersTabType {
