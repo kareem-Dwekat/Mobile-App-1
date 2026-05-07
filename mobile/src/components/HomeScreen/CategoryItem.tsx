@@ -12,9 +12,10 @@ import { CategoryItemType } from "../../types/category";
 interface Props {
   item: CategoryItemType;
   onPress?: () => void;
+  active?: boolean;
 }
 
-const CategoryItem = ({ item, onPress }: Props) => {
+const CategoryItem = ({ item, onPress, active }: Props) => {
   const { width } = useWindowDimensions();
   const isSmallDevice = width < 375;
 
@@ -25,7 +26,7 @@ const CategoryItem = ({ item, onPress }: Props) => {
   return (
     <TouchableOpacity
       style={[styles.container, { width: itemWidth }]}
-      onPress={onPress}
+      onPress={() => onPress?.()}
       activeOpacity={0.8}
     >
       <View
@@ -35,10 +36,16 @@ const CategoryItem = ({ item, onPress }: Props) => {
             width: boxSize,
             height: boxSize,
             borderRadius: 16,
+            backgroundColor: active ? "#DBEAFE" : "#FFFFFF",
+            borderColor: active ? "#2563EB" : "#E5E7EB",
           },
         ]}
       >
-        <Ionicons name={item.icon as any} size={iconSize} color="#2563EB" />
+        <Ionicons
+          name={item.icon as any}
+          size={iconSize}
+          color={active ? "#1D4ED8" : "#2563EB"}
+        />
       </View>
 
       <Text
@@ -46,6 +53,8 @@ const CategoryItem = ({ item, onPress }: Props) => {
           styles.label,
           {
             fontSize: isSmallDevice ? 12 : 13,
+            color: active ? "#1D4ED8" : "#111827",
+            fontWeight: active ? "700" : "500",
           },
         ]}
         numberOfLines={2}
@@ -63,6 +72,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 14,
   },
+
   iconBox: {
     alignItems: "center",
     justifyContent: "center",
@@ -76,10 +86,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
+
   label: {
-    color: "#111827",
     textAlign: "center",
-    fontWeight: "500",
     lineHeight: 18,
   },
 });

@@ -16,7 +16,7 @@ import PromoBanner from "../../components/HomeScreen/PromoBanner";
 import SearchSection from "../../components/HomeScreen/SearchSection";
 import SectionHeader from "../../components/HomeScreen/SectionHeader";
 
-import { initialWishlistData } from "../../constants/wishlist";
+import { useWishlist } from "../../hooks/useWishlist";
 import { getProductsFromFirestore } from "../../services/product.service";
 
 type ProductItem = {
@@ -38,24 +38,33 @@ const normalizeCategory = (category?: string) => {
 
 export default function Home() {
   const insets = useSafeAreaInsets();
+  const { items: wishlistItems } = useWishlist();
 
   const [search, setSearch] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
+
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [draftCategory, setDraftCategory] = useState("All");
+
   const [maxPrice, setMaxPrice] = useState(5000);
   const [draftMaxPrice, setDraftMaxPrice] = useState(5000);
 
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const wishlistCount = initialWishlistData.length;
+  const [showAll, setShowAll] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const PAGE_SIZE = 10;
+
+  const wishlistCount = wishlistItems.reduce((total, item) => {
+    return total + item.qty;
+  }, 0);
 
   const loadProducts = async () => {
     try {
       setLoading(true);
       const data = await getProductsFromFirestore();
-      console.log("Firestore products:", data);
       setProducts(data as ProductItem[]);
     } catch (error) {
       console.log("Load products error:", error);
@@ -68,6 +77,11 @@ export default function Home() {
     loadProducts();
   }, []);
 
+  useEffect(() => {
+    setShowAll(false);
+    setCurrentPage(1);
+  }, [selectedCategory]);
+
   const filteredProducts = useMemo(() => {
     return products.filter((item) => {
       const matchesSearch = item.productName
@@ -75,14 +89,29 @@ export default function Home() {
         .includes(search.toLowerCase());
 
       const matchesPrice = Number(item.price) <= maxPrice;
-
       const itemCategory = normalizeCategory(item.category);
+
       const matchesCategory =
         selectedCategory === "All" || itemCategory === selectedCategory;
 
       return matchesSearch && matchesPrice && matchesCategory;
     });
   }, [products, search, selectedCategory, maxPrice]);
+
+  const randomProducts = useMemo(() => {
+    return [...filteredProducts].sort(() => Math.random() - 0.5).slice(0, 10);
+  }, [filteredProducts]);
+
+  const displayedProducts = useMemo(() => {
+    if (!showAll) return randomProducts;
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+
+    return filteredProducts.slice(start, end);
+  }, [filteredProducts, showAll, currentPage, randomProducts]);
+
+  const totalPages = Math.ceil(filteredProducts.length / PAGE_SIZE);
 
   const openFilter = () => {
     setDraftCategory(selectedCategory);
@@ -108,7 +137,7 @@ export default function Home() {
           <ActivityIndicator size="large" style={styles.loader} />
         ) : (
           <FlatList
-            data={filteredProducts}
+            data={displayedProducts}
             keyExtractor={(item) => item.id}
             numColumns={2}
             columnWrapperStyle={styles.productRow}
@@ -125,11 +154,19 @@ export default function Home() {
                 />
 
                 <SectionHeader title="Categories" />
-                <CategoriesRow />
+
+                <CategoriesRow onSelectCategory={setSelectedCategory} />
 
                 <PromoBanner />
 
-                <SectionHeader title="Featured Products" actionText="See all" />
+                <SectionHeader
+                  title="Products"
+                  actionText="See all"
+                  onPress={() => {
+                    setShowAll(true);
+                    setCurrentPage(1);
+                  }}
+                />
               </>
             }
             renderItem={({ item }) => <ProductCard item={item} />}
@@ -137,6 +174,30 @@ export default function Home() {
               <Text style={styles.emptyText}>No products found</Text>
             }
           />
+        )}
+
+        {showAll && totalPages > 1 && (
+          <View style={styles.pagination}>
+            <Text
+              style={styles.pageBtn}
+              onPress={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            >
+              Previous
+            </Text>
+
+            <Text style={styles.pageText}>
+              {currentPage} / {totalPages}
+            </Text>
+
+            <Text
+              style={styles.pageBtn}
+              onPress={() =>
+                setCurrentPage((p) => (p < totalPages ? p + 1 : p))
+              }
+            >
+              Next
+            </Text>
+          </View>
         )}
 
         <FilterModal
@@ -179,5 +240,20 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 40,
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 15,
+  },
+  pageBtn: {
+    marginHorizontal: 20,
+    color: "#2F80ED",
+    fontSize: 16,
+  },
+  pageText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
