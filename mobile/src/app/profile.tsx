@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,20 +10,26 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import SectionTitle from "@/components/profile/SectionTitle";
 import ProfileInput from "@/components/profile/ProfileInput";
 import ProfileSelect from "@/components/profile/ProfileSelect";
-
-import { COLORS ,COUNTRY_OPTIONS  ,STATE_OPTIONS ,CITY_OPTIONS} from "@/constants/Profile";
-import { ProfileFormData } from "@/types/profile";
 import ProfileImage from "@/components/AccountComponents/AccountImage";
+
+import {
+  COLORS,
+  COUNTRY_OPTIONS,
+  STATE_OPTIONS,
+  CITY_OPTIONS,
+} from "@/constants/Profile";
+
+import { ProfileFormData } from "@/types/profile";
+import { auth } from "@/config/firebaseConfig";
 
 export default function ProfileScreen() {
   const router = useRouter();
 
   const [form, setForm] = useState<ProfileFormData>({
-    email: "customer@example.com",
+    email: "",
     password: "************",
     zipCode: "5000",
     address: "Dhaka",
@@ -32,6 +38,18 @@ export default function ProfileScreen() {
     country: "Australia",
     accountHolderName: "customers",
   });
+
+  useEffect(() => {
+    const user = auth.currentUser;
+
+    if (user) {
+      setForm((prev) => ({
+        ...prev,
+        email: user.email ?? "",
+        accountHolderName: user.displayName ?? prev.accountHolderName,
+      }));
+    }
+  }, []);
 
   const handleChange = (key: keyof ProfileFormData, value: string) => {
     setForm((prev) => ({
@@ -55,14 +73,11 @@ export default function ProfileScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={COLORS.text} />
           </TouchableOpacity>
+
           <Text style={styles.headerTitle}>Profile</Text>
         </View>
 
-        <ProfileImage
-          name={form.accountHolderName}
-         
-        />
-
+        <ProfileImage name={form.accountHolderName} />
 
         <SectionTitle title="Personal Details" />
 
@@ -72,18 +87,16 @@ export default function ProfileScreen() {
           onChangeText={(text) => handleChange("email", text)}
           keyboardType="email-address"
           autoCapitalize="none"
+          editable={false}
         />
 
         <ProfileInput
           label="Password"
           value={form.password}
-          onChangeText={(text) => handleChange("password", text)}
+          onChangeText={() => {}}
           secureTextEntry
+          editable={false}
         />
-
-        <TouchableOpacity style={styles.changePasswordBtn}>
-          <Text style={styles.changePasswordText}>Change Password</Text>
-        </TouchableOpacity>
 
         <View style={styles.divider} />
 
@@ -166,16 +179,6 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "700",
     color: COLORS.text,
-  },
-  changePasswordBtn: {
-    alignSelf: "flex-end",
-    marginTop: -4,
-    marginBottom: 10,
-  },
-  changePasswordText: {
-    color: COLORS.primary,
-    fontSize: 15,
-    fontWeight: "600",
   },
   divider: {
     height: 1,
