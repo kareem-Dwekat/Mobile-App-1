@@ -17,6 +17,7 @@ import ProfileSelect from "@/components/profile/ProfileSelect";
 
 import { COLORS ,COUNTRY_OPTIONS  ,STATE_OPTIONS ,CITY_OPTIONS} from "@/constants/Profile";
 import { ProfileFormData } from "@/types/profile";
+import ProfileImage from "@/components/AccountComponents/AccountImage";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -57,7 +58,11 @@ export default function ProfileScreen() {
           <Text style={styles.headerTitle}>Profile</Text>
         </View>
 
-        <ProfileAvatar />
+        <ProfileImage
+          name={form.accountHolderName}
+         
+        />
+
 
         <SectionTitle title="Personal Details" />
 

@@ -21,14 +21,19 @@ export default function ProfileSelect({
   onValueChange,
   items,
 }: Props) {
+  const selectedLabel =
+    items.find((item) => item.value === selectedValue)?.label || selectedValue;
+
   return (
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
+
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={selectedValue}
-          onValueChange={onValueChange}
+          onValueChange={(value) => onValueChange(String(value))}
           style={styles.picker}
+          dropdownIconColor={COLORS.text}
         >
           {items.map((item) => (
             <Picker.Item
@@ -39,6 +44,8 @@ export default function ProfileSelect({
           ))}
         </Picker>
       </View>
+
+      <Text style={styles.selectedText}>Selected: {selectedLabel}</Text>
     </View>
   );
 }
@@ -64,5 +71,11 @@ const styles = StyleSheet.create({
   picker: {
     height: 56,
     color: COLORS.text,
+  },
+  selectedText: {
+    marginTop: 6,
+    fontSize: 13,
+    color: COLORS.primary,
+    fontWeight: "600",
   },
 });
