@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -19,12 +19,9 @@ interface Props {
     images?: string[];
   };
   onPress?: () => void;
-  onHeartPress?: (id: string) => void;
 }
 
-const ProductCard = ({ item, onPress, onHeartPress }: Props) => {
-  const [liked, setLiked] = useState(false);
-
+const ProductCard = ({ item, onPress }: Props) => {
   const { width } = useWindowDimensions();
   const cardWidth = (width - 16 * 2 - 12) / 2;
   const imageHeight = cardWidth * 1.05;
@@ -39,11 +36,6 @@ const ProductCard = ({ item, onPress, onHeartPress }: Props) => {
       ? item.images[0]
       : "https://via.placeholder.com/300x300.png?text=No+Image";
 
-  const handleHeartPress = () => {
-    setLiked(!liked);
-    onHeartPress?.(item.id);
-  };
-
   return (
     <TouchableOpacity
       style={[styles.card, { width: cardWidth }]}
@@ -57,17 +49,9 @@ const ProductCard = ({ item, onPress, onHeartPress }: Props) => {
           resizeMode="cover"
         />
 
-        <TouchableOpacity
-          style={[styles.heart, liked && styles.heartActive]}
-          onPress={handleHeartPress}
-          activeOpacity={0.8}
-        >
-          <Ionicons
-            name={liked ? "heart" : "heart-outline"}
-            size={17}
-            color="#fff"
-          />
-        </TouchableOpacity>
+        <View style={styles.heart}>
+          <Ionicons name="heart-outline" size={16} color="#fff" />
+        </View>
       </View>
 
       <Text
@@ -117,10 +101,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
     padding: 6,
     borderRadius: 20,
-    zIndex: 5,
-  },
-  heartActive: {
-    backgroundColor: "#ff3b30",
   },
   title: {
     fontWeight: "600",
