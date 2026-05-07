@@ -14,20 +14,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCart } from "../hooks/CartContext";
 import { useWishlist } from "../hooks/useWishlist";
+import { CartItemType } from "../types/cart";
 
 const { width } = Dimensions.get("window");
 
 export default function ProductDetail() {
-  const params = useLocalSearchParams<{
-    id: string;
-    productName: string;
-    description: string;
-    price: string;
-    stock: string;
-    category: string;
-    brand: string;
-    images: string;
-  }>();
+  const params = useLocalSearchParams();
 
   const { addToCart } = useCart();
   const { addToWishlist, items: wishlistItems } = useWishlist();
@@ -35,52 +27,73 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [qty, setQty] = useState(1);
 
-  const images: string[] = params.images
-    ? JSON.parse(params.images as string)
-    : [];
-  const price = parseFloat(params.price ?? "0");
-  const stock = parseInt(params.stock ?? "0");
+  const productId = String(params.id ?? "");
+  const productName = String(params.productName ?? "");
+  const description = String(params.description ?? "");
+  const category = String(params.category ?? "");
+  const brand = String(params.brand ?? "");
+  const price = Number(params.price ?? 0);
+  const stock = Number(params.stock ?? 0);
 
-  const isInWishlist = wishlistItems.some((i) => i.id === params.id);
+  let images: string[] = [];
+
+  try {
+    images = params.images ? JSON.parse(String(params.images)) : [];
+  } catch {
+    images = [];
+  }
+
+  const mainImage =
+    images[selectedImage] ||
+    "https://via.placeholder.com/400x400.png?text=No+Image";
+
+  const isInWishlist = wishlistItems.some((item) => item.id === productId);
 
   const handleAddToCart = () => {
-    addToCart([
-      {
-        id: params.id,
-        title: params.productName ?? "",
-        category: params.category ?? "",
-        price,
-        image: images[0] ?? "",
-        qty,
-      },
-    ]);
+    const cartItem: CartItemType = {
+      id: productId,
+      title: productName,
+      category,
+      price,
+      image: images[0] ?? "",
+      qty,
+      selected: true,
+      quantity: 0
+    };
+
+    addToCart([cartItem]);
+
     router.push("/(tabs)/cart");
   };
 
   const handleWishlist = () => {
-    addToWishlist({
-      id: params.id,
-      title: params.productName ?? "",
-      category: params.category ?? "",
+    const wishlistItem: CartItemType = {
+      id: productId,
+      title: productName,
+      category,
       price,
       image: images[0] ?? "",
       qty: 1,
       selected: false,
-    });
+      quantity: 0
+    };
+
+    addToWishlist(wishlistItem);
   };
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <StatusBar barStyle="dark-content" />
 
-      { }
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color="#111" />
         </TouchableOpacity>
+
         <Text style={styles.headerTitle} numberOfLines={1}>
-          {params.productName}
+          {productName}
         </Text>
+
         <TouchableOpacity onPress={handleWishlist} style={styles.wishBtn}>
           <Ionicons
             name={isInWishlist ? "heart" : "heart-outline"}
@@ -90,24 +103,23 @@ export default function ProductDetail() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-
-        { }
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scroll}
+      >
         <View style={styles.imageWrapper}>
           <Image
-            source={{
-              uri:
-                images[selectedImage] ??
-                "https://via.placeholder.com/400x400.png?text=No+Image",
-            }}
+            source={{ uri: mainImage }}
             style={styles.mainImage}
             resizeMode="cover"
           />
+
           {stock <= 5 && stock > 0 && (
             <View style={styles.stockBadge}>
               <Text style={styles.stockBadgeText}>Only {stock} left!</Text>
             </View>
           )}
+
           {stock === 0 && (
             <View style={[styles.stockBadge, styles.outOfStock]}>
               <Text style={styles.stockBadgeText}>Out of Stock</Text>
@@ -115,49 +127,49 @@ export default function ProductDetail() {
           )}
         </View>
 
-        { }
         {images.length > 1 && (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.thumbRow}
           >
-            {images.map((img, idx) => (
+            {images.map((img, index) => (
               <TouchableOpacity
-                key={idx}
-                onPress={() => setSelectedImage(idx)}
+                key={index}
+                onPress={() => setSelectedImage(index)}
                 style={[
                   styles.thumb,
-                  selectedImage === idx && styles.thumbActive,
+                  selectedImage === index && styles.thumbActive,
                 ]}
               >
-                <Image source={{ uri: img }} style={styles.thumbImg} resizeMode="cover" />
+                <Image
+                  source={{ uri: img }}
+                  style={styles.thumbImg}
+                  resizeMode="cover"
+                />
               </TouchableOpacity>
             ))}
           </ScrollView>
         )}
 
-
         <View style={styles.info}>
-
           <View style={styles.tagRow}>
-            {params.category ? (
+            {category ? (
               <View style={styles.tag}>
-                <Text style={styles.tagText}>{params.category}</Text>
+                <Text style={styles.tagText}>{category}</Text>
               </View>
             ) : null}
-            {params.brand ? (
+
+            {brand ? (
               <View style={[styles.tag, styles.tagBrand]}>
                 <Text style={[styles.tagText, styles.tagBrandText]}>
-                  {params.brand}
+                  {brand}
                 </Text>
               </View>
             ) : null}
           </View>
 
-
-          <Text style={styles.productName}>{params.productName}</Text>
-
+          <Text style={styles.productName}>{productName}</Text>
 
           <Text style={styles.price}>${price.toFixed(2)}</Text>
 
@@ -165,18 +177,20 @@ export default function ProductDetail() {
 
           <Text style={styles.sectionTitle}>Description</Text>
           <Text style={styles.description}>
-            {params.description && params.description !== "undefined"
-              ? params.description
+            {description && description !== "undefined"
+              ? description
               : "No description available."}
           </Text>
 
           <View style={styles.divider} />
+
           <View style={styles.stockRow}>
             <Ionicons
               name="cube-outline"
               size={18}
               color={stock > 0 ? "#22C55E" : "#EF4444"}
             />
+
             <Text
               style={[
                 styles.stockText,
@@ -187,9 +201,10 @@ export default function ProductDetail() {
             </Text>
           </View>
 
-
           <View style={styles.divider} />
+
           <Text style={styles.sectionTitle}>Quantity</Text>
+
           <View style={styles.qtyRow}>
             <TouchableOpacity
               style={styles.qtyBtn}
@@ -197,9 +212,12 @@ export default function ProductDetail() {
             >
               <Ionicons name="remove" size={20} color="#111" />
             </TouchableOpacity>
+
             <Text style={styles.qtyNum}>{qty}</Text>
+
             <TouchableOpacity
               style={styles.qtyBtn}
+              disabled={stock === 0}
               onPress={() => setQty((q) => Math.min(stock || 99, q + 1))}
             >
               <Ionicons name="add" size={20} color="#111" />
@@ -212,7 +230,6 @@ export default function ProductDetail() {
           </View>
         </View>
       </ScrollView>
-
 
       <View style={styles.bottomBar}>
         <TouchableOpacity
@@ -242,7 +259,6 @@ export default function ProductDetail() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#fff" },
 
-
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -270,16 +286,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F4F6",
   },
 
-
   scroll: { paddingBottom: 120 },
 
-
   imageWrapper: {
-    width: width,
+    width,
     height: width * 0.9,
     backgroundColor: "#F9FAFB",
   },
   mainImage: { width: "100%", height: "100%" },
+
   stockBadge: {
     position: "absolute",
     top: 16,
@@ -290,8 +305,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   outOfStock: { backgroundColor: "#EF4444" },
-  stockBadgeText: { color: "#fff", fontWeight: "700", fontSize: 12 },
-
+  stockBadgeText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 12,
+  },
 
   thumbRow: {
     paddingHorizontal: 16,
@@ -309,17 +327,33 @@ const styles = StyleSheet.create({
   thumbActive: { borderColor: "#F97316" },
   thumbImg: { width: "100%", height: "100%" },
 
-  info: { paddingHorizontal: 16, paddingTop: 8 },
-  tagRow: { flexDirection: "row", gap: 8, marginBottom: 10 },
+  info: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+  },
+  tagRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 10,
+  },
   tag: {
     backgroundColor: "#FFF7ED",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
   },
-  tagBrand: { backgroundColor: "#F3F4F6" },
-  tagText: { fontSize: 12, color: "#F97316", fontWeight: "600" },
-  tagBrandText: { color: "#6B7280" },
+  tagBrand: {
+    backgroundColor: "#F3F4F6",
+  },
+  tagText: {
+    fontSize: 12,
+    color: "#F97316",
+    fontWeight: "600",
+  },
+  tagBrandText: {
+    color: "#6B7280",
+  },
+
   productName: {
     fontSize: 22,
     fontWeight: "800",
@@ -333,7 +367,12 @@ const styles = StyleSheet.create({
     color: "#F97316",
     marginBottom: 16,
   },
-  divider: { height: 1, backgroundColor: "#F3F4F6", marginVertical: 16 },
+
+  divider: {
+    height: 1,
+    backgroundColor: "#F3F4F6",
+    marginVertical: 16,
+  },
   sectionTitle: {
     fontSize: 15,
     fontWeight: "700",
@@ -345,9 +384,16 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     lineHeight: 22,
   },
-  stockRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  stockText: { fontSize: 14, fontWeight: "600" },
 
+  stockRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  stockText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
 
   qtyRow: {
     flexDirection: "row",
@@ -363,7 +409,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  qtyNum: { fontSize: 20, fontWeight: "700", color: "#111", minWidth: 30, textAlign: "center" },
+  qtyNum: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111",
+    minWidth: 30,
+    textAlign: "center",
+  },
+
   totalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -372,9 +425,16 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 14,
   },
-  totalLabel: { fontSize: 15, color: "#6B7280", fontWeight: "600" },
-  totalValue: { fontSize: 20, fontWeight: "800", color: "#F97316" },
-
+  totalLabel: {
+    fontSize: 15,
+    color: "#6B7280",
+    fontWeight: "600",
+  },
+  totalValue: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#F97316",
+  },
 
   bottomBar: {
     position: "absolute",
@@ -411,6 +471,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
   },
-  disabledBtn: { opacity: 0.4 },
-  addToCartText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  disabledBtn: {
+    opacity: 0.4,
+  },
+  addToCartText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+  },
 });

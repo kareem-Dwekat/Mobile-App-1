@@ -1,47 +1,56 @@
-import React from "react";
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  useWindowDimensions,
-  TouchableOpacity,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useWishlist } from "../../hooks/useWishlist";
+import React from "react";
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from "react-native";
 
-interface Props {
-  item: {
-    id: string;
-    productName?: string;
-    description?: string;
-    price?: number;
-    stock?: number;
-    category?: string;
-    brand?: string;
-    images?: string[];
-  };
-}
+import { useWishlist } from "../../hooks/useWishlist";
+import type { WishlistItemType } from "../../types/wishlist";
+
+type ProductItemType = {
+  id: string;
+  productName?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  category?: string;
+  brand?: string;
+  images?: string[];
+};
+
+type Props = {
+  item: ProductItemType;
+};
 
 const ProductCard = ({ item }: Props) => {
   const { width } = useWindowDimensions();
+  const { items: wishlistItems, addToWishlist, removeFromWishlist } =
+    useWishlist();
+
   const cardWidth = (width - 16 * 2 - 12) / 2;
   const imageHeight = cardWidth * 1.05;
   const isSmallDevice = width < 375;
 
-  const title = item?.productName || "No Title";
-  const price = item?.price ?? 0;
-  const category = item?.category || "No Category";
-  const brand = item?.brand || "";
+  const title = item.productName ?? "No Title";
+  const price = item.price ?? 0;
+  const category = item.category ?? "No Category";
+  const brand = item.brand ?? "";
   const imageSource =
-    item?.images && item.images.length > 0
+    item.images && item.images.length > 0
       ? item.images[0]
       : "https://via.placeholder.com/300x300.png?text=No+Image";
 
+  const isInWishlist = wishlistItems.some((wishItem) => wishItem.id === item.id);
+
   const handlePress = () => {
     router.push({
-      pathname: "/product-detail",
+      pathname: "../product-detail",
       params: {
         id: item.id,
         productName: item.productName ?? "",
@@ -55,26 +64,23 @@ const ProductCard = ({ item }: Props) => {
     });
   };
 
-  const { items: wishlistItems, addToWishlist, removeFromWishlist } = useWishlist();
-  const isInWishlist = wishlistItems.some((i) => i.id === item.id);
-
-  const handleWishlistPress = (e: any) => {
-    if (e && e.stopPropagation) {
-      e.stopPropagation();
-    }
+  const handleWishlistPress = () => {
     if (isInWishlist) {
       removeFromWishlist(item.id);
-    } else {
-      addToWishlist({
-        id: item.id,
-        title: item.productName ?? "",
-        category: item.category ?? "",
-        price: item.price ?? 0,
-        image: imageSource,
-        qty: 1,
-        selected: false,
-      });
+      return;
     }
+
+    const wishlistItem: WishlistItemType = {
+      id: item.id,
+      title,
+      category,
+      price,
+      image: imageSource,
+      qty: 1,
+      selected: false,
+    };
+
+    addToWishlist(wishlistItem);
   };
 
   return (
@@ -91,7 +97,11 @@ const ProductCard = ({ item }: Props) => {
         />
 
         <TouchableOpacity style={styles.heart} onPress={handleWishlistPress}>
-          <Ionicons name={isInWishlist ? "heart" : "heart-outline"} size={16} color={isInWishlist ? "#FF6B00" : "#fff"} />
+          <Ionicons
+            name={isInWishlist ? "heart" : "heart-outline"}
+            size={16}
+            color={isInWishlist ? "#FF6B00" : "#fff"}
+          />
         </TouchableOpacity>
       </View>
 
