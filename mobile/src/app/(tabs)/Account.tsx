@@ -14,7 +14,7 @@ const PROFILE_MENU_ITEMS = [
   { title: "Wish List", icon: "heart-outline" },
   { title: "Shipping Address", icon: "location-outline" },
   { title: "Your Profile", icon: "person-outline" },
-  { title: "Add Product", icon: "add-circle-outline" }, // 👈 تمت الإضافة
+  { title: "Add Product", icon: "add-circle-outline" }, 
   { title: "Logout", icon: "log-out-outline" },
 ];
 
@@ -115,7 +115,7 @@ const ProfileScreen = () => {
 
         <ProfileImage
           name={profileName}
-          onEditPress={() => Alert.alert("Edit Profile Image")}
+         
         />
 
         <View style={styles.menu}>
