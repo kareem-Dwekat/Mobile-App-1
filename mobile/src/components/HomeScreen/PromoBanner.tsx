@@ -7,7 +7,7 @@ import {
   FlatList,
 } from "react-native";
 
-import { getBanners } from "@/services/bannerService";
+import { getProductsFromFirestore } from "@/services/product.service";
 
 interface PromoBannerItem {
   id: string;
@@ -25,10 +25,20 @@ const PromoBanner = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getBanners();
-        setBanners(data.slice(0, 5));
+        const products = await getProductsFromFirestore();
+
+        const productImages: PromoBannerItem[] = products
+          .filter((product: any) => product.images && product.images.length > 0)
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 5)
+          .map((product: any) => ({
+            id: product.id,
+            image: product.images[0],
+          }));
+
+        setBanners(productImages);
       } catch (error) {
-        console.log(error);
+        console.log("Promo banner products error:", error);
       }
     };
 
@@ -44,12 +54,7 @@ const PromoBanner = () => {
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
       renderItem={({ item }) => (
-        <View
-          style={[
-            styles.card,
-            { width: bannerWidth, height: bannerHeight },
-          ]}
-        >
+        <View style={[styles.card, { width: bannerWidth, height: bannerHeight }]}>
           <Image source={{ uri: item.image }} style={styles.image} />
         </View>
       )}
