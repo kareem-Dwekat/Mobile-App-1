@@ -7,40 +7,39 @@ const PaymentHistoryCard = ({
   onViewInvoice,
   onPrintInvoice,
 }: PaymentHistoryCardProps) => {
+  const orderIdsText = Array.isArray(item.orderIds)
+    ? item.orderIds.map((id) => `#${id}`).join(", ")
+    : `#${item.orderIds}`;
+
   return (
     <View style={styles.card}>
       <View style={styles.topRow}>
-        <View>
-          <Text style={styles.orderText}>Order IDs: {item.orderIds}</Text>
-          <Text style={styles.amountText}>USD {item.amount}</Text>
-        </View>
+        <Text style={styles.orderText}>Order IDs: {orderIdsText}</Text>
+        <Text style={styles.itemsText}>Items: {item.items}</Text>
+      </View>
 
-        <View style={styles.rightBox}>
-          <Text style={styles.itemsText}>Items: {item.items}</Text>
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>{item.status}</Text>
-          </View>
+      <View style={styles.amountRow}>
+        <Text style={styles.amountText}>USD {item.amount}</Text>
+
+        <View style={styles.statusBadge}>
+          <Text style={styles.statusText}>{item.status}</Text>
         </View>
       </View>
 
-      {item.paymentMethod ? (
-        <View style={styles.methodRow}>
-          <Text style={styles.methodLabel}>Payment Method</Text>
-          <Text style={styles.methodValue}>{item.paymentMethod}</Text>
-        </View>
-      ) : null}
+      <View style={styles.methodRow}>
+        <Text style={styles.methodLabel}>Payment Method</Text>
+        <Text style={styles.methodValue}>{item.paymentMethod || "stripe"}</Text>
+      </View>
 
-      {item.showActions ? (
-        <View style={styles.actions}>
-          <TouchableOpacity style={styles.viewBtn} onPress={onViewInvoice}>
-            <Text style={styles.viewBtnText}>View Invoice</Text>
-          </TouchableOpacity>
+      <View style={styles.actions}>
+        <TouchableOpacity style={styles.viewBtn} onPress={onViewInvoice}>
+          <Text style={styles.viewBtnText}>View Invoice</Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity style={styles.printBtn} onPress={onPrintInvoice}>
-            <Text style={styles.printBtnText}>Print Invoice</Text>
-          </TouchableOpacity>
-        </View>
-      ) : null}
+        <TouchableOpacity style={styles.printBtn} onPress={onPrintInvoice}>
+          <Text style={styles.printBtnText}>Print Invoice</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -49,94 +48,100 @@ export default PaymentHistoryCard;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#E5E7EB",
-    padding: 16,
-    marginBottom: 16,
+    padding: 14,
+    marginBottom: 14,
   },
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
   },
   orderText: {
+    flex: 1,
     fontSize: 15,
     fontWeight: "700",
-    color: "#111827",
-    marginBottom: 14,
-  },
-  amountText: {
-    fontSize: 16,
-    color: "#111827",
-  },
-  rightBox: {
-    alignItems: "flex-end",
+    color: "#374151",
   },
   itemsText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#111827",
-    marginBottom: 12,
+    color: "#374151",
+    marginLeft: 10,
+  },
+  amountRow: {
+    marginTop: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  amountText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#374151",
   },
   statusBadge: {
-    backgroundColor: "#E8F7E8",
+    backgroundColor: "#DFF4E5",
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderRadius: 999,
   },
   statusText: {
-    color: "#4CAF50",
+    color: "#37A05B",
     fontWeight: "700",
+    fontSize: 13,
     textTransform: "lowercase",
   },
   methodRow: {
+    marginTop: 16,
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 22,
-    marginBottom: 18,
   },
   methodLabel: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#111827",
+    color: "#374151",
   },
   methodValue: {
     fontSize: 15,
-    color: "#111827",
+    fontWeight: "700",
+    color: "#374151",
+    textTransform: "lowercase",
   },
   actions: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 14,
+    gap: 12,
+    marginTop: 18,
   },
   viewBtn: {
     flex: 1,
-    height: 52,
+    height: 48,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 12,
+    borderColor: "#E5E7EB",
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
   },
   viewBtnText: {
-    color: "#111827",
-    fontSize: 16,
-    fontWeight: "600",
+    color: "#374151",
+    fontSize: 15,
+    fontWeight: "700",
   },
   printBtn: {
     flex: 1,
-    height: 52,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F97316",
+    backgroundColor: "#DF5B52",
   },
   printBtnText: {
-    color: "#fff",
-    fontSize: 16,
+    color: "#FFFFFF",
+    fontSize: 15,
     fontWeight: "700",
   },
 });

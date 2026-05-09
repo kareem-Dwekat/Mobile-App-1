@@ -1,60 +1,108 @@
-import React from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import * as Print from "expo-print";
 
 import PaymentHistoryHeader from "../components/payment/PaymentHistoryHeader";
 import PaymentHistoryCard from "../components/payment/PaymentHistoryCard";
-import { paymentHistoryData } from "../constants/paymentHistory";
 import { PaymentHistoryItemType } from "../types/paymentHistory";
+import { useCart } from "../hooks/CartContext";
+import { getPaymentHistory } from "../services/paymentHistory.service";
 
 export default function PaymentHistoryScreen() {
-  
+  const { userId } = useCart();
+
+  const [payments, setPayments] = useState<PaymentHistoryItemType[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPayments = async () => {
+      try {
+        if (!userId) {
+          setPayments([]);
+          return;
+        }
+
+        const data = await getPaymentHistory(userId);
+        console.log("Payment history data:", data);
+
+        setPayments(data as PaymentHistoryItemType[]);
+      } catch (error) {
+        console.log("Payment history error:", error);
+        setPayments([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPayments();
+  }, [userId]);
 
   const handleViewInvoice = (item: PaymentHistoryItemType) => {
-    router.push("/invoice");
+    router.push({
+      pathname: "/invoice",
+      params: {
+        paymentId: item.id,
+      },
+    });
   };
 
-  
   const handlePrintInvoice = async (item: PaymentHistoryItemType) => {
     try {
+      const orderIdsText = Array.isArray(item.orderIds)
+        ? item.orderIds.join(", ")
+        : item.orderIds;
+
       const html = `
         <html>
           <body style="font-family: Arial; padding: 20px;">
             <h2>Invoice</h2>
-            <p><strong>Order IDs:</strong> ${item.orderIds}</p>
+            <p><strong>Order IDs:</strong> ${orderIdsText}</p>
             <p><strong>Items:</strong> ${item.items}</p>
             <p><strong>Total:</strong> $${item.amount}</p>
-            <p><strong>Payment Method:</strong> ${item.paymentMethod || "stripe"}</p>
+            <p><strong>Payment Method:</strong> ${item.paymentMethod || "N/A"}</p>
             <p><strong>Status:</strong> ${item.status}</p>
           </body>
         </html>
       `;
-  
+
       await Print.printAsync({ html });
     } catch (error) {
       console.log("Print error:", error);
     }
   };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.container}>
         <PaymentHistoryHeader onBack={() => router.back()} />
 
-        <FlatList
-          data={paymentHistoryData}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <PaymentHistoryCard
-              item={item}
-              onViewInvoice={() => handleViewInvoice(item)}
-              onPrintInvoice={() => handlePrintInvoice(item)}
-            />
-          )}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
-        />
+        {loading ? (
+          <ActivityIndicator size="large" style={styles.loader} />
+        ) : payments.length === 0 ? (
+          <Text style={styles.emptyText}>No payment history found</Text>
+        ) : (
+          <FlatList
+            data={payments}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <PaymentHistoryCard
+                item={item}
+                onViewInvoice={() => handleViewInvoice(item)}
+                onPrintInvoice={() => handlePrintInvoice(item)}
+              />
+            )}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -72,5 +120,14 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 24,
+  },
+  loader: {
+    marginTop: 40,
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 40,
+    fontSize: 16,
+    color: "#777",
   },
 });

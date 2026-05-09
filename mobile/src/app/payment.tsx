@@ -1,14 +1,17 @@
 import React, { useMemo, useState } from "react";
 import { Alert, SafeAreaView, ScrollView, StyleSheet, Text } from "react-native";
 import { router } from "expo-router";
+
 import PaymentHeader from "../components/payment/PaymentHeader";
 import ShippingAddressCard from "../components/payment/ShippingAddressCard";
 import TotalCard from "../components/payment/TotalCard";
 import PaymentMethodCard from "../components/payment/PaymentMethodCard";
 import PaymentDetailsForm from "../components/payment/paymentDetailsform";
 import PaymentFooter from "../components/payment/PaymentFooter";
+
 import { useCart } from "../hooks/CartContext";
 import { calculateCartTotal, createOrder } from "../services/orders.service";
+import { createPaymentHistory } from "../services/paymentHistory.service";
 
 import {
   PAYMENT_COLORS,
@@ -21,6 +24,7 @@ import usePayment from "../hooks/usePayment";
 export default function PaymentScreen() {
   const { cartItems, clearCart, userId } = useCart();
   const [processing, setProcessing] = useState(false);
+
   const {
     selectedMethod,
     setSelectedMethod,
@@ -60,7 +64,6 @@ export default function PaymentScreen() {
 
     if (cartItems.length === 0) {
       Alert.alert("Error", "Your cart is empty");
-      router.replace("/(tabs)/cart");
       return;
     }
 
@@ -74,7 +77,7 @@ export default function PaymentScreen() {
     if (!isValid) {
       Alert.alert(
         "Validation Error",
-        "Please fill in the required fields correctly."
+        "Please fill in the payment details correctly."
       );
       return;
     }
@@ -82,19 +85,32 @@ export default function PaymentScreen() {
     try {
       setProcessing(true);
 
-      await createOrder({
+      const order = await createOrder({
         userId,
         cartItems,
         paymentMethod: selectedMethod,
         shippingAddress: SHIPPING_ADDRESS,
       });
 
+      await createPaymentHistory({
+        userId,
+        orderIds: [order.id],
+        cartItems,
+        amount: order.amount,
+        paymentMethod: selectedMethod,
+        status: "Paid",
+      });
+
       await clearCart();
 
-      Alert.alert("Success", `Payment completed with ${selectedMethod}`);
-      router.replace("/myOrders");
+      Alert.alert("Success", "Payment completed successfully", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/payment-history"),
+        },
+      ]);
     } catch (error) {
-      console.error("Failed to create order:", error);
+      console.log("Payment error:", error);
       Alert.alert("Error", "Payment failed. Please try again.");
     } finally {
       setProcessing(false);
@@ -108,20 +124,16 @@ export default function PaymentScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <PaymentHeader />
 
-        {/* Shipping Address */}
         <ShippingAddressCard
           address={SHIPPING_ADDRESS}
           selected={selectedAddress}
           onSelect={toggleAddress}
         />
 
-        {/* Total */}
         <TotalCard summary={paymentSummary} />
 
-        {/* Payment Methods */}
         <Text style={styles.sectionTitle}>Select payment gateway</Text>
 
         {PAYMENT_OPTIONS.map((item) => (
@@ -134,7 +146,6 @@ export default function PaymentScreen() {
           />
         ))}
 
-        {/* Dynamic Form */}
         <PaymentDetailsForm
           selectedMethod={selectedMethod}
           formData={formData}
@@ -142,7 +153,6 @@ export default function PaymentScreen() {
           updateField={updateField}
         />
 
-        {/* Footer */}
         <PaymentFooter
           total={paymentSummary.totalPayment}
           buttonTitle={processing ? "Processing..." : buttonTitle}

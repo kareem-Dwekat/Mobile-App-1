@@ -1,4 +1,8 @@
 export interface InvoiceItemType {
+    orderIds: string;
+    items: number;
+    date: string;
+    amount: number;
     id: string;
     title: string;
     quantity: number;
