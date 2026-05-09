@@ -1,52 +1,52 @@
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { InvoiceCardProps } from "../../types/invoice";
 
 const InvoiceCard = ({ item }: InvoiceCardProps) => {
   return (
     <View style={styles.container}>
-      <View style={styles.productRow}>
-        <Image source={{ uri: item.image }} style={styles.image} />
-
-        <View style={styles.productInfo}>
-          <Text style={styles.title} numberOfLines={2}>
-            {item.title}
-          </Text>
-          <Text style={styles.quantity}>Quantity: {item.quantity}</Text>
-          <Text style={styles.price}>$ {item.price}</Text>
-        </View>
-      </View>
+      <Text style={styles.title}>Invoice Details</Text>
 
       <View style={styles.divider} />
 
       <View style={styles.infoRow}>
+        <Text style={styles.label}>Order IDs</Text>
+        <Text style={styles.value}>{item.orderIds || "N/A"}</Text>
+      </View>
+
+      <View style={styles.infoRow}>
+        <Text style={styles.label}>Items</Text>
+        <Text style={styles.value}>{item.items || 0}</Text>
+      </View>
+
+      <View style={styles.infoRow}>
         <Text style={styles.label}>Order Date</Text>
-        <Text style={styles.value}>{item.orderDate}</Text>
+        <Text style={styles.value}>{item.date || "N/A"}</Text>
       </View>
 
       <View style={styles.infoRow}>
         <Text style={styles.label}>Invoice ID</Text>
-        <Text style={styles.value}>{item.invoiceId}</Text>
+        <Text style={styles.value}>{item.id || "N/A"}</Text>
       </View>
 
       <View style={styles.infoRow}>
         <Text style={styles.label}>Payment Method</Text>
-        <Text style={styles.value}>{item.paymentMethod}</Text>
+        <Text style={styles.value}>{item.paymentMethod || "N/A"}</Text>
       </View>
 
       <View style={styles.infoRow}>
         <Text style={styles.label}>Total</Text>
-        <Text style={styles.value}>$ {item.total}</Text>
+        <Text style={styles.value}>$ {item.amount || 0}</Text>
       </View>
 
       <View style={styles.infoRow}>
         <Text style={styles.label}>VAT</Text>
-        <Text style={styles.value}>$ {item.vat}</Text>
+        <Text style={styles.value}>$ 0</Text>
       </View>
 
       <View style={styles.infoRow}>
         <Text style={styles.label}>Status</Text>
-        <Text style={styles.value}>{item.status}</Text>
+        <Text style={styles.value}>{item.status || "N/A"}</Text>
       </View>
     </View>
   );
@@ -56,38 +56,17 @@ export default InvoiceCard;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#F8F8F8",
-  },
-  productRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  image: {
-    width: 108,
-    height: 108,
+    backgroundColor: "#FFFFFF",
     borderRadius: 14,
-    marginRight: 14,
-    backgroundColor: "#E5E7EB",
-  },
-  productInfo: {
-    flex: 1,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
   title: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#111827",
-    marginBottom: 8,
-  },
-  quantity: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginBottom: 16,
-  },
-  price: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "700",
     color: "#111827",
+    marginBottom: 16,
   },
   divider: {
     height: 1,
@@ -99,13 +78,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 18,
+    gap: 12,
   },
   label: {
     fontSize: 16,
     color: "#111827",
-    fontWeight: "500",
+    fontWeight: "600",
   },
   value: {
+    flex: 1,
+    textAlign: "right",
     fontSize: 16,
     color: "#111827",
     fontWeight: "500",
