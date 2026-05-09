@@ -1,31 +1,62 @@
-import { useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { auth } from "../config/firebaseConfig";
+import {
+  addUserAddress,
+  deleteUserAddress,
+  setActiveUserAddress,
+  subscribeToAddresses,
+} from "../services/address.service";
 import { Address } from "../types/address";
-import { MOCK_ADDRESSES } from "../constants/mockData";
 
 export const useAddresses = () => {
-  const [addresses, setAddresses] = useState<Address[]>(MOCK_ADDRESSES);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+
+  useEffect(() => {
+    let unsubscribeAddresses = () => {};
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      unsubscribeAddresses();
+
+      if (!user) {
+        setAddresses([]);
+        return;
+      }
+
+      unsubscribeAddresses = subscribeToAddresses(user.uid, setAddresses);
+    });
+
+    return () => {
+      unsubscribeAddresses();
+      unsubscribeAuth();
+    };
+  }, []);
 
   const setActiveAddress = (id: string) => {
-    setAddresses((prev) =>
-      prev.map((item) => ({
-        ...item,
-        isActive: item.id === id,
-      }))
-    );
+    const user = auth.currentUser;
+    if (!user) return;
+
+    setActiveUserAddress(user.uid, id).catch((error) => {
+      console.warn("Failed to set active address:", error);
+    });
   };
 
   const deleteAddress = (id: string) => {
-    setAddresses((prev) => prev.filter((item) => item.id !== id));
+    const user = auth.currentUser;
+    if (!user) return;
+
+    deleteUserAddress(user.uid, id).catch((error) => {
+      console.warn("Failed to delete address:", error);
+    });
   };
 
   const addAddress = (newAddress: Omit<Address, "id" | "isActive">) => {
-    const address: Address = {
-      id: Date.now().toString(),
-      ...newAddress,
-      isActive: false,
-    };
+    const user = auth.currentUser;
+    if (!user) return;
 
-    setAddresses((prev) => [address, ...prev]);
+    addUserAddress(user.uid, newAddress).catch((error) => {
+      console.warn("Failed to add address:", error);
+    });
   };
 
   return {
