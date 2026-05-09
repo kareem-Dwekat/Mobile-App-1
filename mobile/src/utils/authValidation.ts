@@ -37,8 +37,14 @@ export const validateSignupForm = ({
 
   if (!password.trim()) {
     errors.password = "Password is required";
-  } else if (password.length < 6) {
-    errors.password = "Minimum 6 characters";
+  } else if (password.length < 8) {
+    errors.password = "Minimum 8 characters";
+  } else if (!/(?=.*[A-Z])/.test(password)) {
+    errors.password = "Must include at least 1 uppercase letter";
+  } else if (!/(?=.*\d)/.test(password)) {
+    errors.password = "Must include at least 1 number";
+  } else if (!/(?=.*[!@#$%^&*])/.test(password)) {
+    errors.password = "Must include at least 1 special character";
   }
 
   if (!confirmPassword.trim()) {
@@ -70,8 +76,8 @@ export const validateLoginForm = ({
 
   if (!password.trim()) {
     errors.password = "Password is required";
-  } else if (password.length < 6) {
-    errors.password = "Minimum 6 characters";
+  } else if (password.length < 8) {
+    errors.password = "Minimum 8 characters";
   }
 
   return errors;
