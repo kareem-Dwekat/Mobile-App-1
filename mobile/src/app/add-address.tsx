@@ -1,16 +1,16 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const COUNTRIES = ["Australia", "Palestine", "Jordan"];
 const STATES = ["Victoria", "NSW", "Queensland"];
@@ -39,9 +39,9 @@ export default function AddAddressScreen() {
       params: {
         title,
         country,
+        state,
         city,
         addressLine1,
-        addressLine2: state,
         zipCode,
       },
     });
