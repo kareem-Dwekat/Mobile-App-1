@@ -6,12 +6,14 @@ type Props = {
   total: number;
   buttonTitle: string;
   onPay: () => void;
+  disabled?: boolean;
 };
 
 export default function PaymentFooter({
   total,
   buttonTitle,
   onPay,
+  disabled = false,
 }: Props) {
   return (
     <View style={styles.wrapper}>
@@ -20,7 +22,11 @@ export default function PaymentFooter({
         <Text style={styles.totalValue}>{total.toFixed(2)} $</Text>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={onPay}>
+      <TouchableOpacity
+        style={[styles.button, disabled && styles.buttonDisabled]}
+        onPress={onPay}
+        disabled={disabled}
+      >
         <Text style={styles.buttonText}>{buttonTitle}</Text>
       </TouchableOpacity>
     </View>
@@ -53,6 +59,9 @@ const styles = StyleSheet.create({
     height: 56,
     justifyContent: "center",
     alignItems: "center",
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   buttonText: {
     color: "#fff",

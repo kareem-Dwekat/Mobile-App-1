@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
 import {
   addMultipleItemsToCartFirebase,
+  clearCartFirebase,
   removeItemFromCartFirebase,
   subscribeToCart,
   updateCartItemQuantity,
@@ -14,6 +15,8 @@ interface CartContextType {
   addToCart: (items: CartItemType[]) => void;
   removeFromCart: (id: string) => void;
   changeQty: (id: string, type: "inc" | "dec") => void;
+  clearCart: () => Promise<boolean>;
+  userId: string | null;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -63,8 +66,15 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     updateCartItemQuantity(userId, id, Math.max(1, newQty));
   };
 
+  const clearCart = async () => {
+    if (!userId) return false;
+    return clearCartFirebase(userId);
+  };
+
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, changeQty }}>
+    <CartContext.Provider
+      value={{ cartItems, addToCart, removeFromCart, changeQty, clearCart, userId }}
+    >
       {children}
     </CartContext.Provider>
   );

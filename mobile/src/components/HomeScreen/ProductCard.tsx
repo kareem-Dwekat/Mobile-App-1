@@ -26,9 +26,10 @@ type ProductItemType = {
 
 type Props = {
   item: ProductItemType;
+  onPress?: () => void;
 };
 
-const ProductCard = ({ item }: Props) => {
+const ProductCard = ({ item, onPress }: Props) => {
   const { width } = useWindowDimensions();
   const { items: wishlistItems, addToWishlist, removeFromWishlist } =
     useWishlist();
@@ -87,7 +88,7 @@ const ProductCard = ({ item }: Props) => {
     <TouchableOpacity
       style={[styles.card, { width: cardWidth }]}
       activeOpacity={0.9}
-      onPress={handlePress}
+      onPress={onPress ?? handlePress}
     >
       <View>
         <Image

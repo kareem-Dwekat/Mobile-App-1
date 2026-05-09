@@ -1,22 +1,26 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { Alert, SafeAreaView, ScrollView, StyleSheet, Text } from "react-native";
+import { router } from "expo-router";
 import PaymentHeader from "../components/payment/PaymentHeader";
 import ShippingAddressCard from "../components/payment/ShippingAddressCard";
 import TotalCard from "../components/payment/TotalCard";
 import PaymentMethodCard from "../components/payment/PaymentMethodCard";
 import PaymentDetailsForm from "../components/payment/paymentDetailsform";
 import PaymentFooter from "../components/payment/PaymentFooter";
+import { useCart } from "../hooks/CartContext";
+import { calculateCartTotal, createOrder } from "../services/orders.service";
 
 import {
   PAYMENT_COLORS,
   PAYMENT_OPTIONS,
-  PAYMENT_SUMMARY,
   SHIPPING_ADDRESS,
 } from "../constants/payment";
 
 import usePayment from "../hooks/usePayment";
 
 export default function PaymentScreen() {
+  const { cartItems, clearCart, userId } = useCart();
+  const [processing, setProcessing] = useState(false);
   const {
     selectedMethod,
     setSelectedMethod,
@@ -28,6 +32,17 @@ export default function PaymentScreen() {
     toggleAddress,
   } = usePayment();
 
+  const paymentSummary = useMemo(() => {
+    const subtotal = calculateCartTotal(cartItems);
+
+    return {
+      subtotal,
+      vat: 0,
+      shippingCosts: 0,
+      totalPayment: subtotal,
+    };
+  }, [cartItems]);
+
   const buttonTitle =
     selectedMethod === "paypal"
       ? "Pay by PayPal"
@@ -37,7 +52,18 @@ export default function PaymentScreen() {
       ? "Pay by Razorpay"
       : "Pay by Flutterwave";
 
-  const handlePay = () => {
+  const handlePay = async () => {
+    if (!userId) {
+      Alert.alert("Error", "Please login before payment");
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      Alert.alert("Error", "Your cart is empty");
+      router.replace("/(tabs)/cart");
+      return;
+    }
+
     if (!selectedAddress) {
       Alert.alert("Error", "Please select a shipping address");
       return;
@@ -53,7 +79,26 @@ export default function PaymentScreen() {
       return;
     }
 
-    Alert.alert("Success", `Payment completed with ${selectedMethod}`);
+    try {
+      setProcessing(true);
+
+      await createOrder({
+        userId,
+        cartItems,
+        paymentMethod: selectedMethod,
+        shippingAddress: SHIPPING_ADDRESS,
+      });
+
+      await clearCart();
+
+      Alert.alert("Success", `Payment completed with ${selectedMethod}`);
+      router.replace("/myOrders");
+    } catch (error) {
+      console.error("Failed to create order:", error);
+      Alert.alert("Error", "Payment failed. Please try again.");
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (
@@ -74,7 +119,7 @@ export default function PaymentScreen() {
         />
 
         {/* Total */}
-        <TotalCard summary={PAYMENT_SUMMARY} />
+        <TotalCard summary={paymentSummary} />
 
         {/* Payment Methods */}
         <Text style={styles.sectionTitle}>Select payment gateway</Text>
@@ -99,9 +144,10 @@ export default function PaymentScreen() {
 
         {/* Footer */}
         <PaymentFooter
-          total={PAYMENT_SUMMARY.totalPayment}
-          buttonTitle={buttonTitle}
+          total={paymentSummary.totalPayment}
+          buttonTitle={processing ? "Processing..." : buttonTitle}
           onPay={handlePay}
+          disabled={processing}
         />
       </ScrollView>
     </SafeAreaView>
