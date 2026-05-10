@@ -1,7 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import { OrderCardProps } from "../../types/order";
 
 const OrderCard = ({ item, isExpanded, onPress }: OrderCardProps) => {
@@ -17,24 +16,6 @@ const OrderCard = ({ item, isExpanded, onPress }: OrderCardProps) => {
         return {};
     }
   };
-
-  const handleReviewPress = () => {
-    const firstProduct = item.products[0];
-
-    router.push({
-      pathname: "/review-order",
-      params: {
-        id: item.id,
-        title: firstProduct?.title ?? `Order #${item.id}`,
-        description: firstProduct?.category ?? "Order review",
-        price: String(firstProduct?.price ?? item.amount),
-        image: firstProduct?.image ?? "",
-      },
-    });
-  };
-
- 
-
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.rowBetween}>
@@ -87,19 +68,9 @@ const OrderCard = ({ item, isExpanded, onPress }: OrderCardProps) => {
           </View>
 
           <View style={styles.actions}>
-            <TouchableOpacity
-              style={styles.reviewBtn}
-              onPress={handleReviewPress}
-            >
-              <Text style={styles.btnText}>Order Review</Text>
-            </TouchableOpacity>
+           
 
-            <TouchableOpacity
-  style={styles.trackBtn}
-  onPress={() => router.push("/track-order")}
->
-  <Text style={styles.btnText}>Track Order</Text>
-</TouchableOpacity>
+           
           </View>
         </>
       )}
