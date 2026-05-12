@@ -1,17 +1,13 @@
 import React from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Controller, Control, FieldErrors } from "react-hook-form";
 import { PAYMENT_COLORS } from "../../constants/payment";
-import {
-  PaymentFormData,
-  PaymentFormErrors,
-  PaymentMethod,
-} from "../../types/payment";
+import { PaymentFormData, PaymentMethod } from "../../types/payment";
 
 type Props = {
   selectedMethod: PaymentMethod;
-  formData: PaymentFormData;
-  errors: PaymentFormErrors;
-  updateField: (field: keyof PaymentFormData, value: string) => void;
+  control: Control<PaymentFormData>;
+  errors: FieldErrors<PaymentFormData>;
 };
 
 type InputFieldProps = {
@@ -20,6 +16,7 @@ type InputFieldProps = {
   placeholder: string;
   error?: string;
   onChangeText: (value: string) => void;
+  onBlur?: () => void;
 };
 
 function InputField({
@@ -28,6 +25,7 @@ function InputField({
   placeholder,
   error,
   onChangeText,
+  onBlur,
 }: InputFieldProps) {
   return (
     <View style={styles.inputGroup}>
@@ -37,6 +35,7 @@ function InputField({
         value={value}
         placeholder={placeholder}
         onChangeText={onChangeText}
+        onBlur={onBlur}
         style={[styles.input, error ? styles.inputError : null]}
         placeholderTextColor="#999"
       />
@@ -48,104 +47,183 @@ function InputField({
 
 export default function PaymentDetailsForm({
   selectedMethod,
-  formData,
+  control,
   errors,
-  updateField,
 }: Props) {
   return (
     <View style={styles.card}>
       <Text style={styles.title}>Payment Details</Text>
 
       {selectedMethod === "paypal" && (
-        <InputField
-          label="PayPal Email"
-          value={formData.paypalEmail}
-          placeholder="Enter your PayPal email"
-          error={errors.paypalEmail}
-          onChangeText={(value) => updateField("paypalEmail", value)}
+        <Controller
+          control={control}
+          name="paypalEmail"
+          rules={{ required: "PayPal email is required" }}
+          render={({ field: { value, onChange, onBlur } }) => (
+            <InputField
+              label="PayPal Email"
+              value={value}
+              placeholder="Enter your PayPal email"
+              error={errors.paypalEmail?.message}
+              onChangeText={onChange}
+              onBlur={onBlur}
+            />
+          )}
         />
       )}
 
       {selectedMethod === "stripe" && (
         <>
-          <InputField
-            label="Card Holder Name"
-            value={formData.cardHolderName}
-            placeholder="Enter card holder name"
-            error={errors.cardHolderName}
-            onChangeText={(value) => updateField("cardHolderName", value)}
+          <Controller
+            control={control}
+            name="cardHolderName"
+            rules={{ required: "Card holder name is required" }}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <InputField
+                label="Card Holder Name"
+                value={value}
+                placeholder="Enter card holder name"
+                error={errors.cardHolderName?.message}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
           />
 
-          <InputField
-            label="Card Number"
-            value={formData.cardNumber}
-            placeholder="1234567890123456"
-            error={errors.cardNumber}
-            onChangeText={(value) => updateField("cardNumber", value)}
+          <Controller
+            control={control}
+            name="cardNumber"
+            rules={{ required: "Card number is required" }}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <InputField
+                label="Card Number"
+                value={value}
+                placeholder="1234567890123456"
+                error={errors.cardNumber?.message}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
           />
 
-          <InputField
-            label="Expiry Date"
-            value={formData.expiryDate}
-            placeholder="MM/YY"
-            error={errors.expiryDate}
-            onChangeText={(value) => updateField("expiryDate", value)}
+          <Controller
+            control={control}
+            name="expiryDate"
+            rules={{ required: "Expiry date is required" }}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <InputField
+                label="Expiry Date"
+                value={value}
+                placeholder="MM/YY"
+                error={errors.expiryDate?.message}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
           />
 
-          <InputField
-            label="CVV"
-            value={formData.cvv}
-            placeholder="123"
-            error={errors.cvv}
-            onChangeText={(value) => updateField("cvv", value)}
+          <Controller
+            control={control}
+            name="cvv"
+            rules={{ required: "CVV is required" }}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <InputField
+                label="CVV"
+                value={value}
+                placeholder="123"
+                error={errors.cvv?.message}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
           />
         </>
       )}
 
       {selectedMethod === "razorpay" && (
         <>
-          <InputField
-            label="Phone Number"
-            value={formData.razorpayPhone}
-            placeholder="Enter phone number"
-            error={errors.razorpayPhone}
-            onChangeText={(value) => updateField("razorpayPhone", value)}
+          <Controller
+            control={control}
+            name="razorpayPhone"
+            rules={{ required: "Phone number is required" }}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <InputField
+                label="Phone Number"
+                value={value}
+                placeholder="Enter phone number"
+                error={errors.razorpayPhone?.message}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
           />
 
-          <InputField
-            label="UPI ID"
-            value={formData.razorpayUpi}
-            placeholder="example@upi"
-            error={errors.razorpayUpi}
-            onChangeText={(value) => updateField("razorpayUpi", value)}
+          <Controller
+            control={control}
+            name="razorpayUpi"
+            rules={{ required: "UPI ID is required" }}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <InputField
+                label="UPI ID"
+                value={value}
+                placeholder="example@upi"
+                error={errors.razorpayUpi?.message}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
           />
         </>
       )}
 
       {selectedMethod === "flutterwave" && (
         <>
-          <InputField
-            label="Full Name"
-            value={formData.flutterwaveFullName}
-            placeholder="Enter full name"
-            error={errors.flutterwaveFullName}
-            onChangeText={(value) => updateField("flutterwaveFullName", value)}
+          <Controller
+            control={control}
+            name="flutterwaveFullName"
+            rules={{ required: "Full name is required" }}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <InputField
+                label="Full Name"
+                value={value}
+                placeholder="Enter full name"
+                error={errors.flutterwaveFullName?.message}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
           />
 
-          <InputField
-            label="Email"
-            value={formData.flutterwaveEmail}
-            placeholder="Enter email"
-            error={errors.flutterwaveEmail}
-            onChangeText={(value) => updateField("flutterwaveEmail", value)}
+          <Controller
+            control={control}
+            name="flutterwaveEmail"
+            rules={{ required: "Email is required" }}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <InputField
+                label="Email"
+                value={value}
+                placeholder="Enter email"
+                error={errors.flutterwaveEmail?.message}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
           />
 
-          <InputField
-            label="Phone Number"
-            value={formData.flutterwavePhone}
-            placeholder="Enter phone number"
-            error={errors.flutterwavePhone}
-            onChangeText={(value) => updateField("flutterwavePhone", value)}
+          <Controller
+            control={control}
+            name="flutterwavePhone"
+            rules={{ required: "Phone number is required" }}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <InputField
+                label="Phone Number"
+                value={value}
+                placeholder="Enter phone number"
+                error={errors.flutterwavePhone?.message}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
           />
         </>
       )}

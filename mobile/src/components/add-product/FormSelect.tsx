@@ -14,6 +14,7 @@ type Props = {
   options: Option[];
   error?: string;
   onValueChange: (value: string) => void;
+  onBlur?: () => void;
 };
 
 export default function FormSelect({
@@ -22,6 +23,7 @@ export default function FormSelect({
   options,
   error,
   onValueChange,
+  onBlur,
 }: Props) {
   return (
     <View style={styles.wrapper}>
@@ -30,7 +32,10 @@ export default function FormSelect({
       <View style={[styles.selectBox, error ? styles.selectError : null]}>
         <Picker
           selectedValue={value}
-          onValueChange={(itemValue) => onValueChange(itemValue)}
+          onValueChange={(itemValue) => {
+            onValueChange(itemValue);
+            onBlur?.();
+          }}
           style={styles.picker}
           dropdownIconColor={ADD_PRODUCT_COLORS.text}
         >
@@ -45,7 +50,7 @@ export default function FormSelect({
         </Picker>
       </View>
 
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {!!error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 }

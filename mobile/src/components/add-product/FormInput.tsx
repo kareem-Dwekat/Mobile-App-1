@@ -10,6 +10,7 @@ type Props = {
   keyboardType?: "default" | "numeric";
   error?: string;
   onChangeText: (value: string) => void;
+  onBlur?: () => void;
 };
 
 export default function FormInput({
@@ -20,6 +21,7 @@ export default function FormInput({
   keyboardType = "default",
   error,
   onChangeText,
+  onBlur,
 }: Props) {
   return (
     <View style={styles.wrapper}>
@@ -30,6 +32,7 @@ export default function FormInput({
         placeholder={placeholder}
         placeholderTextColor={ADD_PRODUCT_COLORS.placeholder}
         onChangeText={onChangeText}
+        onBlur={onBlur}
         multiline={multiline}
         keyboardType={keyboardType}
         style={[

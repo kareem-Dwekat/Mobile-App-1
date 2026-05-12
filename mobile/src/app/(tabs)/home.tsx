@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
 
 import CategoriesRow from "../../components/HomeScreen/CategoriesRow";
 import FilterModal from "../../components/HomeScreen/FilterModal";
@@ -18,6 +19,11 @@ import SectionHeader from "../../components/HomeScreen/SectionHeader";
 
 import { useWishlist } from "../../hooks/useWishlist";
 import { getProductsFromFirestore } from "../../services/product.service";
+
+import {
+  getProductsFromSQLite,
+  saveProductsToSQLite,
+} from "../../services/productsOffline.service";
 
 type ProductItem = {
   id: string;
@@ -49,35 +55,43 @@ export default function Home() {
   const [maxPrice, setMaxPrice] = useState(5000);
   const [draftMaxPrice, setDraftMaxPrice] = useState(5000);
 
-  const [products, setProducts] = useState<ProductItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const [showAll, setShowAll] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const PAGE_SIZE = 10;
 
+  const {
+    data: productsData = [],
+    isLoading: loading,
+    isError,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      try {
+        const products = await getProductsFromFirestore();
+
+        saveProductsToSQLite(products as ProductItem[]);
+
+        return products;
+      } catch (error) {
+        const offlineProducts = getProductsFromSQLite();
+
+        if (offlineProducts.length > 0) {
+          return offlineProducts;
+        }
+
+        throw error;
+      }
+    },
+  });
+
+  const products = productsData as ProductItem[];
+
   const wishlistCount = wishlistItems.reduce((total, item) => {
     return total + item.qty;
   }, 0);
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      const data = await getProductsFromFirestore();
-      setProducts(data as ProductItem[]);
-    } catch (error) {
-      console.log("Load products error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  useEffect(() => {
+  React.useEffect(() => {
     setShowAll(false);
     setCurrentPage(1);
   }, [selectedCategory]);
@@ -135,6 +149,8 @@ export default function Home() {
       <View style={[styles.container, { paddingTop: insets.top > 0 ? 8 : 16 }]}>
         {loading ? (
           <ActivityIndicator size="large" style={styles.loader} />
+        ) : isError ? (
+          <Text style={styles.emptyText}>Failed to load products</Text>
         ) : (
           <FlatList
             data={displayedProducts}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   StyleSheet,
@@ -9,39 +9,30 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { useMutation } from "@tanstack/react-query";
 
 import ForgotPasswordForm from "../components/auth/ForgotPasswordForm";
 import { AUTH_COLORS } from "../constants/auth";
-import { validateForgotPasswordEmail } from "../utils/authValidation";
 import { resetPassword } from "../services/auth.service";
 
+type ForgotPasswordFormData = {
+  email: string;
+};
+
 export default function ForgotPasswordScreen() {
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const resetMutation = useMutation({
+    mutationFn: (email: string) => resetPassword(email),
 
-  const handleReset = async () => {
-    const validationError = validateForgotPasswordEmail(email);
-
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    setError("");
-
-    try {
-      setLoading(true);
-
-      await resetPassword(email);
-
+    onSuccess: () => {
       Alert.alert(
         "Success",
         "Password reset email sent. Please check your email."
       );
 
       router.replace("/login");
-    } catch (err: any) {
+    },
+
+    onError: (err: any) => {
       if (err.code === "auth/user-not-found") {
         Alert.alert("Error", "User not found");
       } else if (err.code === "auth/invalid-email") {
@@ -51,9 +42,11 @@ export default function ForgotPasswordScreen() {
       } else {
         Alert.alert("Error", err?.message || "Something went wrong");
       }
-    } finally {
-      setLoading(false);
-    }
+    },
+  });
+
+  const handleReset = (data: ForgotPasswordFormData) => {
+    resetMutation.mutate(data.email);
   };
 
   return (
@@ -65,13 +58,7 @@ export default function ForgotPasswordScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.container}>
             <ForgotPasswordForm
-              email={email}
-              error={error}
-              loading={loading}
-              onChangeEmail={(text) => {
-                setEmail(text);
-                if (error) setError("");
-              }}
+              loading={resetMutation.isPending}
               onSubmit={handleReset}
               onBackToLogin={() => router.push("/login")}
             />

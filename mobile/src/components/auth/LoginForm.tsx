@@ -8,25 +8,38 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
+import { Controller, useForm } from "react-hook-form";
 import { AUTH_COLORS } from "../../constants/auth";
-import { LoginFormProps } from "../../types/auth";
 
+type LoginFormData = {
+  email: string;
+  password: string;
+};
 
-
-
-
+type LoginFormProps = {
+  loading: boolean;
+  onSubmit: (data: LoginFormData) => void;
+  onForgotPassword: () => void;
+  onGoToSignup: () => void;
+};
 
 export default function LoginForm({
-  email,
-  password,
-  errors,
   loading,
-  onChangeEmail,
-  onChangePassword,
   onSubmit,
   onForgotPassword,
   onGoToSignup,
 }: LoginFormProps) {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
   return (
     <View style={styles.card}>
       <Image
@@ -38,31 +51,63 @@ export default function LoginForm({
       <Text style={styles.title}>Welcome Back</Text>
       <Text style={styles.subtitle}>Login to continue</Text>
 
-      <TextInput
-        placeholder="Enter your email"
-        style={[styles.input, errors.email ? styles.inputError : null]}
-        value={email}
-        onChangeText={onChangeEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        returnKeyType="next"
+      <Controller
+        control={control}
+        name="email"
+        rules={{
+          required: "Email is required",
+          pattern: {
+            value: /^\S+@\S+\.\S+$/,
+            message: "Enter a valid email",
+          },
+        }}
+        render={({ field: { value, onChange, onBlur } }) => (
+          <TextInput
+            placeholder="Enter your email"
+            style={[styles.input, errors.email ? styles.inputError : null]}
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            returnKeyType="next"
+          />
+        )}
       />
-      {!!errors.email && <Text style={styles.error}>{errors.email}</Text>}
+      {!!errors.email && (
+        <Text style={styles.error}>{errors.email.message}</Text>
+      )}
 
-      <TextInput
-        placeholder="Enter your password"
-        secureTextEntry
-        style={[styles.input, errors.password ? styles.inputError : null]}
-        value={password}
-        onChangeText={onChangePassword}
-        returnKeyType="done"
-        onSubmitEditing={onSubmit}
+      <Controller
+        control={control}
+        name="password"
+        rules={{
+          required: "Password is required",
+          minLength: {
+            value: 6,
+            message: "Password must be at least 6 characters",
+          },
+        }}
+        render={({ field: { value, onChange, onBlur } }) => (
+          <TextInput
+            placeholder="Enter your password"
+            secureTextEntry
+            style={[styles.input, errors.password ? styles.inputError : null]}
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            returnKeyType="done"
+            onSubmitEditing={handleSubmit(onSubmit)}
+          />
+        )}
       />
-      {!!errors.password && <Text style={styles.error}>{errors.password}</Text>}
+      {!!errors.password && (
+        <Text style={styles.error}>{errors.password.message}</Text>
+      )}
 
       <TouchableOpacity
         style={[styles.button, loading ? styles.buttonDisabled : null]}
-        onPress={onSubmit}
+        onPress={handleSubmit(onSubmit)}
         disabled={loading}
       >
         {loading ? (

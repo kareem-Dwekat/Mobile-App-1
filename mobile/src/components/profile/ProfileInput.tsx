@@ -4,17 +4,21 @@ import { COLORS } from "@/constants/Profile";
 
 interface Props extends TextInputProps {
   label: string;
+  error?: string;
 }
 
-export default function ProfileInput({ label, ...props }: Props) {
+export default function ProfileInput({ label, error, style, ...props }: Props) {
   return (
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
+
       <TextInput
-        style={styles.input}
+        style={[styles.input, error ? styles.inputError : null, style]}
         placeholderTextColor="#9CA3AF"
         {...props}
       />
+
+      {!!error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 }
@@ -38,5 +42,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     fontSize: 16,
     color: COLORS.text,
+  },
+  inputError: {
+    borderColor: "#EF4444",
+  },
+  errorText: {
+    marginTop: 6,
+    color: "#EF4444",
+    fontSize: 12,
   },
 });

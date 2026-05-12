@@ -8,7 +8,7 @@ export default function IndexScreen() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        router.replace("/home"); 
+        router.replace("/(tabs)/home"); 
       } else {
         router.replace("/login");
       }

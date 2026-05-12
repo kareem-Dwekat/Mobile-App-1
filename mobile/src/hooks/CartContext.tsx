@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { auth } from "../config/firebaseConfig";
 import {
   addMultipleItemsToCartFirebase,
@@ -22,8 +24,10 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [cartItems, setCartItems] = useState<CartItemType[]>([]);
+  const queryClient = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
+
+  const queryKey = ["cart", userId];
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (user) => {
@@ -33,26 +37,45 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     return () => unsubAuth();
   }, []);
 
+  const { data: cartItems = [] } = useQuery<CartItemType[]>({
+    queryKey,
+    queryFn: async () => [],
+    enabled: !!userId,
+    initialData: [],
+  });
+
   useEffect(() => {
     if (!userId) {
-      setCartItems([]);
+      queryClient.setQueryData(queryKey, []);
       return;
     }
 
     const unsubscribe = subscribeToCart(userId, (items) => {
-      setCartItems(items);
+      queryClient.setQueryData(queryKey, items);
     });
 
     return () => unsubscribe();
-  }, [userId]);
+  }, [userId, queryClient]);
+
+  const setCartItems = (
+    updater: (prev: CartItemType[]) => CartItemType[]
+  ) => {
+    queryClient.setQueryData<CartItemType[]>(queryKey, (old = []) => {
+      return updater(old);
+    });
+  };
 
   const addToCart = (items: CartItemType[]) => {
     if (!userId) return;
+
     addMultipleItemsToCartFirebase(userId, items);
   };
 
   const removeFromCart = (id: string) => {
     if (!userId) return;
+
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
+
     removeItemFromCartFirebase(userId, id);
   };
 
@@ -63,17 +86,33 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     if (!item) return;
 
     const newQty = type === "inc" ? item.qty + 1 : item.qty - 1;
-    updateCartItemQuantity(userId, id, Math.max(1, newQty));
+    const finalQty = Math.max(1, newQty);
+
+    setCartItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, qty: finalQty } : i))
+    );
+
+    updateCartItemQuantity(userId, id, finalQty);
   };
 
   const clearCart = async () => {
     if (!userId) return false;
+
+    setCartItems(() => []);
+
     return clearCartFirebase(userId);
   };
 
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, removeFromCart, changeQty, clearCart, userId }}
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        changeQty,
+        clearCart,
+        userId,
+      }}
     >
       {children}
     </CartContext.Provider>
