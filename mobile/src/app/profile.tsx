@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { Controller, useForm } from "react-hook-form";
 
 import SectionTitle from "@/components/profile/SectionTitle";
 import ProfileInput from "@/components/profile/ProfileInput";
@@ -30,53 +31,51 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { profile, updateProfileData, updatePhoto } = useUserProfile();
 
-  const [form, setForm] = useState<ProfileFormData>({
-    email: "",
-    password: "************",
-    zipCode: "5000",
-    address: "Dhaka",
-    city: "Melbourne",
-    state: "Victoria (VIC)",
-    country: "Australia",
-    accountHolderName: "customers",
-  });
   const [saving, setSaving] = useState(false);
 
+  const { control, handleSubmit, reset, watch } = useForm<ProfileFormData>({
+    defaultValues: {
+      email: "",
+      password: "************",
+      zipCode: "5000",
+      address: "Dhaka",
+      city: "Melbourne",
+      state: "Victoria (VIC)",
+      country: "Australia",
+      accountHolderName: "customers",
+    },
+  });
+
+  const accountHolderName = watch("accountHolderName");
+
   useEffect(() => {
-    setForm((prev) => ({
-      ...prev,
+    reset({
       email: profile.email,
+      password: "************",
       zipCode: profile.zipCode,
       address: profile.address,
       city: profile.city,
       state: profile.state,
       country: profile.country,
       accountHolderName: profile.fullName,
-    }));
-  }, [profile]);
+    });
+  }, [profile, reset]);
 
-  const handleChange = (key: keyof ProfileFormData, value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const handleConfirm = async () => {
+  const onSubmit = async (data: ProfileFormData) => {
     if (saving) return;
 
     try {
       setSaving(true);
 
       await updateProfileData({
-        fullName: form.accountHolderName,
-        email: form.email,
+        fullName: data.accountHolderName,
+        email: data.email,
         photoURL: profile.photoURL,
-        zipCode: form.zipCode,
-        address: form.address,
-        city: form.city,
-        state: form.state,
-        country: form.country,
+        zipCode: data.zipCode,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        country: data.country,
       });
 
       Alert.alert("Success", "Profile updated successfully");
@@ -115,76 +114,158 @@ export default function ProfileScreen() {
         </View>
 
         <ProfileImage
-          name={form.accountHolderName}
+          name={accountHolderName || "User"}
           imageUri={profile.photoURL}
           onImageChange={handleImageChange}
         />
 
         <SectionTitle title="Personal Details" />
 
-        <ProfileInput
-          label="Email"
-          value={form.email}
-          onChangeText={(text) => handleChange("email", text)}
-          keyboardType="email-address"
-          autoCapitalize="none"
+        <Controller
+          control={control}
+          name="email"
+          rules={{
+            required: "Email is required",
+            pattern: {
+              value: /^\S+@\S+\.\S+$/,
+              message: "Enter a valid email",
+            },
+          }}
+          render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
+            <ProfileInput
+              label="Email"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              error={error?.message}
+            />
+          )}
         />
 
-        <ProfileInput
-          label="Password"
-          value={form.password}
-          onChangeText={() => {}}
-          secureTextEntry
-          editable={false}
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { value } }) => (
+            <ProfileInput
+              label="Password"
+              value={value}
+              onChangeText={() => {}}
+              secureTextEntry
+              editable={false}
+            />
+          )}
         />
 
         <View style={styles.divider} />
 
         <SectionTitle title="Business Address Details" />
 
-        <ProfileInput
-          label="Zip Code"
-          value={form.zipCode}
-          onChangeText={(text) => handleChange("zipCode", text)}
-          keyboardType="number-pad"
+        <Controller
+          control={control}
+          name="zipCode"
+          rules={{
+            required: "Zip code is required",
+            pattern: {
+              value: /^[0-9]+$/,
+              message: "Zip code must be numbers only",
+            },
+          }}
+          render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
+            <ProfileInput
+              label="Zip Code"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              keyboardType="number-pad"
+              error={error?.message}
+            />
+          )}
         />
 
-        <ProfileInput
-          label="Address"
-          value={form.address}
-          onChangeText={(text) => handleChange("address", text)}
+        <Controller
+          control={control}
+          name="address"
+          rules={{ required: "Address is required" }}
+          render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
+            <ProfileInput
+              label="Address"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              error={error?.message}
+            />
+          )}
         />
 
-        <ProfileSelect
-          label="City"
-          selectedValue={form.city}
-          onValueChange={(value) => handleChange("city", value)}
-          items={CITY_OPTIONS}
+        <Controller
+          control={control}
+          name="city"
+          rules={{ required: "City is required" }}
+          render={({ field: { value, onChange }, fieldState: { error } }) => (
+            <ProfileSelect
+              label="City"
+              selectedValue={value}
+              onValueChange={onChange}
+              items={CITY_OPTIONS}
+              error={error?.message}
+            />
+          )}
         />
 
-        <ProfileSelect
-          label="State"
-          selectedValue={form.state}
-          onValueChange={(value) => handleChange("state", value)}
-          items={STATE_OPTIONS}
+        <Controller
+          control={control}
+          name="state"
+          rules={{ required: "State is required" }}
+          render={({ field: { value, onChange }, fieldState: { error } }) => (
+            <ProfileSelect
+              label="State"
+              selectedValue={value}
+              onValueChange={onChange}
+              items={STATE_OPTIONS}
+              error={error?.message}
+            />
+          )}
         />
 
-        <ProfileSelect
-          label="Country"
-          selectedValue={form.country}
-          onValueChange={(value) => handleChange("country", value)}
-          items={COUNTRY_OPTIONS}
+        <Controller
+          control={control}
+          name="country"
+          rules={{ required: "Country is required" }}
+          render={({ field: { value, onChange }, fieldState: { error } }) => (
+            <ProfileSelect
+              label="Country"
+              selectedValue={value}
+              onValueChange={onChange}
+              items={COUNTRY_OPTIONS}
+              error={error?.message}
+            />
+          )}
         />
 
         <View style={styles.divider} />
 
-        <ProfileInput
-          label="Account Holder's Name"
-          value={form.accountHolderName}
-          onChangeText={(text) => handleChange("accountHolderName", text)}
+        <Controller
+          control={control}
+          name="accountHolderName"
+          rules={{ required: "Account holder name is required" }}
+          render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
+            <ProfileInput
+              label="Account Holder's Name"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              error={error?.message}
+            />
+          )}
         />
 
-        <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+        <TouchableOpacity
+          style={styles.confirmButton}
+          onPress={handleSubmit(onSubmit)}
+          disabled={saving}
+        >
           <Text style={styles.confirmText}>
             {saving ? "Saving..." : "Confirm"}
           </Text>

@@ -19,7 +19,7 @@ const PROFILE_MENU_ITEMS = [
   { title: "Logout", icon: "log-out-outline" },
 ];
 
-const ProfileScreen = () => {
+const AccountScreen = () => {
   const insets = useSafeAreaInsets();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { profile, updatePhoto } = useUserProfile();
@@ -121,7 +121,7 @@ const ProfileScreen = () => {
   );
 };
 
-export default ProfileScreen;
+export default AccountScreen;
 
 const styles = StyleSheet.create({
   safeArea: {

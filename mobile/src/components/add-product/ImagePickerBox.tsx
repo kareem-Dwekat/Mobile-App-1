@@ -11,18 +11,23 @@ import { ADD_PRODUCT_COLORS } from "../../constants/addProduct";
 
 type Props = {
   images: string[];
+  error?: string;
   onAddImage: () => void;
   onRemoveImage: (index: number) => void;
 };
 
 export default function ImagePickerBox({
   images,
+  error,
   onAddImage,
   onRemoveImage,
 }: Props) {
   return (
     <View>
-      <TouchableOpacity style={styles.uploadBox} onPress={onAddImage}>
+      <TouchableOpacity
+        style={[styles.uploadBox, error ? styles.uploadBoxError : null]}
+        onPress={onAddImage}
+      >
         <Ionicons
           name="cloud-upload-outline"
           size={28}
@@ -31,6 +36,8 @@ export default function ImagePickerBox({
         <Text style={styles.uploadTitle}>Upload Product Images</Text>
         <Text style={styles.uploadSubTitle}>Tap to add image</Text>
       </TouchableOpacity>
+
+      {!!error && <Text style={styles.errorText}>{error}</Text>}
 
       {images.map((item, index) => (
         <View key={`${item}-${index}`} style={styles.imageRow}>
@@ -55,6 +62,9 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
     alignItems: "center",
     justifyContent: "center",
+  },
+  uploadBoxError: {
+    borderColor: ADD_PRODUCT_COLORS.error,
   },
   uploadTitle: {
     marginTop: 8,
@@ -86,5 +96,10 @@ const styles = StyleSheet.create({
   removeText: {
     color: ADD_PRODUCT_COLORS.error,
     fontWeight: "600",
+  },
+  errorText: {
+    marginTop: 6,
+    color: ADD_PRODUCT_COLORS.error,
+    fontSize: 12,
   },
 });

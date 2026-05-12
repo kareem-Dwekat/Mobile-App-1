@@ -1,58 +1,55 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
 
 import InvoiceHeader from "../components/payment/InvoiceHeader";
 import InvoiceCard from "../components/payment/InvoiceCard";
 import { getPaymentHistoryById } from "../services/paymentHistory.service";
 
+type InvoiceItem = {
+  id: string;
+  orderIds: string;
+  items: number;
+  amount: number;
+  paymentMethod: string;
+  status: string;
+  date: string;
+  title?: string;
+  quantity?: number;
+  price?: number;
+  image?: string;
+};
+
 export default function InvoiceScreen() {
   const { paymentId } = useLocalSearchParams();
 
-  const [invoice, setInvoice] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const id = typeof paymentId === "string" ? paymentId : "";
 
-  useEffect(() => {
-    const loadInvoice = async () => {
-      try {
-        if (!paymentId || typeof paymentId !== "string") {
-          setInvoice(null);
-          return;
-        }
+  const { data: invoice, isLoading: loading } = useQuery<InvoiceItem | null>({
+    queryKey: ["invoice", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const data: any = await getPaymentHistoryById(id);
 
-        const data: any = await getPaymentHistoryById(paymentId);
+      if (!data) return null;
 
-        if (!data) {
-          setInvoice(null);
-          return;
-        }
-
-        const invoiceData = {
-          id: data.id,
-          orderIds: Array.isArray(data.orderIds)
-            ? data.orderIds.join(", ")
-            : data.orderIds || "N/A",
-          items: data.items || 0,
-          amount: data.amount || 0,
-          paymentMethod: data.paymentMethod || "N/A",
-          status: data.status || "N/A",
-          date: data.createdAt?.seconds
-            ? new Date(data.createdAt.seconds * 1000).toLocaleDateString()
-            : "N/A",
-        };
-
-        setInvoice(invoiceData);
-      } catch (error) {
-        console.log("Invoice error:", error);
-        setInvoice(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadInvoice();
-  }, [paymentId]);
+      return {
+        id: data.id,
+        orderIds: Array.isArray(data.orderIds)
+          ? data.orderIds.join(", ")
+          : data.orderIds || "N/A",
+        items: data.items || 0,
+        amount: data.amount || 0,
+        paymentMethod: data.paymentMethod || "N/A",
+        status: data.status || "N/A",
+        date: data.createdAt?.seconds
+          ? new Date(data.createdAt.seconds * 1000).toLocaleDateString()
+          : "N/A",
+      };
+    },
+  });
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -64,7 +61,7 @@ export default function InvoiceScreen() {
         ) : !invoice ? (
           <Text style={styles.emptyText}>Invoice not found</Text>
         ) : (
-          <InvoiceCard item={invoice} />
+          <InvoiceCard item={invoice as any } />
         )}
       </View>
     </SafeAreaView>

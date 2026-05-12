@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -9,9 +9,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import * as Print from "expo-print";
+import { useQuery } from "@tanstack/react-query";
 
 import PaymentHistoryHeader from "../components/payment/PaymentHistoryHeader";
 import PaymentHistoryCard from "../components/payment/PaymentHistoryCard";
+
 import { PaymentHistoryItemType } from "../types/paymentHistory";
 import { useCart } from "../hooks/CartContext";
 import { getPaymentHistory } from "../services/paymentHistory.service";
@@ -19,31 +21,23 @@ import { getPaymentHistory } from "../services/paymentHistory.service";
 export default function PaymentHistoryScreen() {
   const { userId } = useCart();
 
-  const [payments, setPayments] = useState<PaymentHistoryItemType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: payments = [],
+    isLoading: loading,
+  } = useQuery<PaymentHistoryItemType[]>({
+    queryKey: ["payment-history", userId],
+    enabled: !!userId,
 
-  useEffect(() => {
-    const loadPayments = async () => {
-      try {
-        if (!userId) {
-          setPayments([]);
-          return;
-        }
+    queryFn: async () => {
+      if (!userId) return [];
 
-        const data = await getPaymentHistory(userId);
-        console.log("Payment history data:", data);
+      const data = await getPaymentHistory(userId);
 
-        setPayments(data as PaymentHistoryItemType[]);
-      } catch (error) {
-        console.log("Payment history error:", error);
-        setPayments([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+      console.log("Payment history data:", data);
 
-    loadPayments();
-  }, [userId]);
+      return data as PaymentHistoryItemType[];
+    },
+  });
 
   const handleViewInvoice = (item: PaymentHistoryItemType) => {
     router.push({
@@ -54,7 +48,9 @@ export default function PaymentHistoryScreen() {
     });
   };
 
-  const handlePrintInvoice = async (item: PaymentHistoryItemType) => {
+  const handlePrintInvoice = async (
+    item: PaymentHistoryItemType
+  ) => {
     try {
       const orderIdsText = Array.isArray(item.orderIds)
         ? item.orderIds.join(", ")
@@ -67,7 +63,9 @@ export default function PaymentHistoryScreen() {
             <p><strong>Order IDs:</strong> ${orderIdsText}</p>
             <p><strong>Items:</strong> ${item.items}</p>
             <p><strong>Total:</strong> $${item.amount}</p>
-            <p><strong>Payment Method:</strong> ${item.paymentMethod || "N/A"}</p>
+            <p><strong>Payment Method:</strong> ${
+              item.paymentMethod || "N/A"
+            }</p>
             <p><strong>Status:</strong> ${item.status}</p>
           </body>
         </html>
@@ -87,7 +85,9 @@ export default function PaymentHistoryScreen() {
         {loading ? (
           <ActivityIndicator size="large" style={styles.loader} />
         ) : payments.length === 0 ? (
-          <Text style={styles.emptyText}>No payment history found</Text>
+          <Text style={styles.emptyText}>
+            No payment history found
+          </Text>
         ) : (
           <FlatList
             data={payments}
@@ -95,8 +95,12 @@ export default function PaymentHistoryScreen() {
             renderItem={({ item }) => (
               <PaymentHistoryCard
                 item={item}
-                onViewInvoice={() => handleViewInvoice(item)}
-                onPrintInvoice={() => handlePrintInvoice(item)}
+                onViewInvoice={() =>
+                  handleViewInvoice(item)
+                }
+                onPrintInvoice={() =>
+                  handlePrintInvoice(item)
+                }
               />
             )}
             showsVerticalScrollIndicator={false}
@@ -113,17 +117,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8F8F8",
   },
+
   container: {
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: 10,
   },
+
   listContent: {
     paddingBottom: 24,
   },
+
   loader: {
     marginTop: 40,
   },
+
   emptyText: {
     textAlign: "center",
     marginTop: 40,

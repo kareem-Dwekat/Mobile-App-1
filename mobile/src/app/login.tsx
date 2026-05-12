@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -9,36 +9,37 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useMutation } from "@tanstack/react-query";
+
 import LoginForm from "../components/auth/LoginForm";
 import { AUTH_COLORS } from "../constants/auth";
-import { LoginErrors } from "../types/auth";
-import { validateLoginForm } from "../utils/authValidation";
 import { loginUser } from "../services/auth.service";
 
+type LoginFormData = {
+  email: string;
+  password: string;
+};
+
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<LoginErrors>({});
+  const loginMutation = useMutation({
+    mutationFn: ({
+      email,
+      password,
+    }: LoginFormData) => loginUser(email, password),
 
-  const handleLogin = async () => {
-    const validationErrors = validateLoginForm({ email, password });
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length > 0) return;
-
-    try {
-      setLoading(true);
-
-      const result = await loginUser(email, password);
-
+    onSuccess: (result) => {
       Alert.alert("Welcome", result.userData?.fullName || "User");
-      router.replace("/home");
-    } catch (error: any) {
+
+      router.replace("/(tabs)/home");
+    },
+
+    onError: (error: any) => {
       Alert.alert("Error", error?.message || "Login failed");
-    } finally {
-      setLoading(false);
-    }
+    },
+  });
+
+  const handleLogin = (data: LoginFormData) => {
+    loginMutation.mutate(data);
   };
 
   return (
@@ -50,22 +51,7 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.container}>
             <LoginForm
-              email={email}
-              password={password}
-              errors={errors}
-              loading={loading}
-              onChangeEmail={(text) => {
-                setEmail(text);
-                if (errors.email) {
-                  setErrors((prev) => ({ ...prev, email: "" }));
-                }
-              }}
-              onChangePassword={(text) => {
-                setPassword(text);
-                if (errors.password) {
-                  setErrors((prev) => ({ ...prev, password: "" }));
-                }
-              }}
+              loading={loginMutation.isPending}
               onSubmit={handleLogin}
               onForgotPassword={() => router.push("/forgot-password")}
               onGoToSignup={() => router.push("/signup")}

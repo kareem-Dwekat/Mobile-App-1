@@ -97,7 +97,11 @@ const ProductCard = ({ item, onPress }: Props) => {
           resizeMode="cover"
         />
 
-        <TouchableOpacity style={styles.heart} onPress={handleWishlistPress}>
+        <TouchableOpacity
+          testID="wishlist-button"
+          style={styles.heart}
+          onPress={handleWishlistPress}
+        >
           <Ionicons
             name={isInWishlist ? "heart" : "heart-outline"}
             size={16}

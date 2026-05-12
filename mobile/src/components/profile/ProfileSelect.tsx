@@ -13,6 +13,7 @@ interface Props {
   selectedValue: string;
   onValueChange: (value: string) => void;
   items: Option[];
+  error?: string;
 }
 
 export default function ProfileSelect({
@@ -20,6 +21,7 @@ export default function ProfileSelect({
   selectedValue,
   onValueChange,
   items,
+  error,
 }: Props) {
   const selectedLabel =
     items.find((item) => item.value === selectedValue)?.label || selectedValue;
@@ -28,7 +30,7 @@ export default function ProfileSelect({
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
 
-      <View style={styles.pickerContainer}>
+      <View style={[styles.pickerContainer, error ? styles.inputError : null]}>
         <Picker
           selectedValue={selectedValue}
           onValueChange={(value) => onValueChange(String(value))}
@@ -44,6 +46,8 @@ export default function ProfileSelect({
           ))}
         </Picker>
       </View>
+
+      {!!error && <Text style={styles.errorText}>{error}</Text>}
 
       <Text style={styles.selectedText}>Selected: {selectedLabel}</Text>
     </View>
@@ -71,6 +75,14 @@ const styles = StyleSheet.create({
   picker: {
     height: 56,
     color: COLORS.text,
+  },
+  inputError: {
+    borderColor: "#EF4444",
+  },
+  errorText: {
+    marginTop: 6,
+    color: "#EF4444",
+    fontSize: 12,
   },
   selectedText: {
     marginTop: 6,

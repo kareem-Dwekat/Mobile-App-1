@@ -15,6 +15,7 @@ export default function Stepper({ currentStep }: Props) {
 
         return (
           <View key={step.id} style={styles.item}>
+            
             <View
               style={[
                 styles.circle,

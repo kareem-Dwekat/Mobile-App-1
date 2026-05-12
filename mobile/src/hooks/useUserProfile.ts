@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DeviceEventEmitter } from "react-native";
 import { onAuthStateChanged } from "firebase/auth";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { auth } from "../config/firebaseConfig";
 import {
   getProfileFallback,
@@ -25,9 +27,33 @@ type ProfilePhotoUpdatedEvent = {
 };
 
 export const useUserProfile = () => {
+  const queryClient = useQueryClient();
+
   const [userId, setUserId] = useState<string | null>(null);
-  const [profile, setProfile] = useState<UserProfileData>(getProfileFallback());
   const [loading, setLoading] = useState(true);
+
+  const queryKey = ["userProfile", userId];
+
+  const { data: profile = getProfileFallback() } = useQuery<UserProfileData>({
+    queryKey,
+    queryFn: async () => getProfileFallback(),
+    enabled: !!userId,
+    initialData: getProfileFallback(),
+  });
+
+  const setProfile = (
+    updater: UserProfileData | ((prev: UserProfileData) => UserProfileData)
+  ) => {
+    queryClient.setQueryData<UserProfileData>(queryKey, (old) => {
+      const previous = old ?? getProfileFallback();
+
+      if (typeof updater === "function") {
+        return updater(previous);
+      }
+
+      return updater;
+    });
+  };
 
   useEffect(() => {
     let unsubscribeProfile: (() => void) | undefined;
@@ -38,27 +64,42 @@ export const useUserProfile = () => {
 
       if (!user) {
         setUserId(null);
-        setProfile(getProfileFallback());
+        queryClient.setQueryData(["userProfile", null], getProfileFallback());
         setLoading(false);
         return;
       }
 
       setUserId(user.uid);
       setLoading(true);
+
       AsyncStorage.getItem(getCachedPhotoKey(user.uid)).then((cachedPhoto) => {
         if (cachedPhoto) {
-          setProfile((prev) => ({ ...prev, photoURL: cachedPhoto }));
+          queryClient.setQueryData<UserProfileData>(
+            ["userProfile", user.uid],
+            (old) => ({
+              ...(old ?? getProfileFallback()),
+              photoURL: cachedPhoto,
+            })
+          );
         }
       });
 
       unsubscribeProfile = subscribeToUserProfile(user.uid, async (data) => {
-        const cachedPhoto = await AsyncStorage.getItem(getCachedPhotoKey(user.uid));
+        const cachedPhoto = await AsyncStorage.getItem(
+          getCachedPhotoKey(user.uid)
+        );
+
         const displayPhoto = data.photoURL || cachedPhoto || "";
 
-        setProfile({
+        const updatedProfile = {
           ...data,
           photoURL: displayPhoto,
-        });
+        };
+
+        queryClient.setQueryData<UserProfileData>(
+          ["userProfile", user.uid],
+          updatedProfile
+        );
 
         if (data.photoURL) {
           await AsyncStorage.setItem(getCachedPhotoKey(user.uid), data.photoURL);
@@ -72,7 +113,7 @@ export const useUserProfile = () => {
       unsubscribeProfile?.();
       unsubscribeAuth();
     };
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
     if (!userId) return;
@@ -81,15 +122,20 @@ export const useUserProfile = () => {
       PROFILE_PHOTO_UPDATED_EVENT,
       (event: ProfilePhotoUpdatedEvent) => {
         if (event.userId !== userId) return;
-        setProfile((prev) => ({ ...prev, photoURL: event.photoURL }));
+
+        queryClient.setQueryData<UserProfileData>(queryKey, (old) => ({
+          ...(old ?? getProfileFallback()),
+          photoURL: event.photoURL,
+        }));
       }
     );
 
     return () => subscription.remove();
-  }, [userId]);
+  }, [userId, queryClient]);
 
   const updateProfileData = async (data: UserProfileData) => {
     if (!userId) return;
+
     const cacheKey = getCachedPhotoKey(userId);
     const photoURL = data.photoURL || profile.photoURL;
     const optimisticProfile = { ...data, photoURL };
@@ -119,11 +165,14 @@ export const useUserProfile = () => {
 
   const updatePhoto = async (photoURL: string, base64?: string) => {
     if (!userId) return;
+
     const cacheKey = getCachedPhotoKey(userId);
     const displayPhotoURL = getDisplayPhotoURL(photoURL, base64);
 
     setProfile((prev) => ({ ...prev, photoURL: displayPhotoURL }));
+
     await AsyncStorage.setItem(cacheKey, displayPhotoURL);
+
     DeviceEventEmitter.emit(PROFILE_PHOTO_UPDATED_EVENT, {
       userId,
       photoURL: displayPhotoURL,
@@ -132,7 +181,9 @@ export const useUserProfile = () => {
     const savedPhotoURL = await saveUserPhoto(userId, photoURL, base64);
 
     setProfile((prev) => ({ ...prev, photoURL: savedPhotoURL }));
+
     await AsyncStorage.setItem(cacheKey, savedPhotoURL);
+
     DeviceEventEmitter.emit(PROFILE_PHOTO_UPDATED_EVENT, {
       userId,
       photoURL: savedPhotoURL,

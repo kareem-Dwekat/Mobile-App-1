@@ -1,8 +1,17 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { InvoiceCardProps } from "../../types/invoice";
 
-const InvoiceCard = ({ item }: InvoiceCardProps) => {
+type InvoiceItem = {
+  id: string;
+  orderIds: string;
+  items: number;
+  amount: number;
+  paymentMethod: string;
+  status: string;
+  date: string;
+};
+
+const InvoiceCard = ({ item }: { item: InvoiceItem }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Invoice Details</Text>

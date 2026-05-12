@@ -8,17 +8,34 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
+import { Controller, useForm } from "react-hook-form";
 import { AUTH_COLORS } from "../../constants/auth";
-import { ForgotPasswordFormProps } from "../../types/auth";
+
+type ForgotPasswordFormData = {
+  email: string;
+};
+
+type ForgotPasswordFormProps = {
+  loading: boolean;
+  onSubmit: (data: ForgotPasswordFormData) => void;
+  onBackToLogin: () => void;
+};
 
 export default function ForgotPasswordForm({
-  email,
-  error,
   loading,
-  onChangeEmail,
   onSubmit,
   onBackToLogin,
 }: ForgotPasswordFormProps) {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ForgotPasswordFormData>({
+    defaultValues: {
+      email: "",
+    },
+  });
+
   return (
     <View style={styles.card}>
       <Image
@@ -32,22 +49,38 @@ export default function ForgotPasswordForm({
         Enter your email to reset your password
       </Text>
 
-      <TextInput
-        placeholder="Enter your email"
-        style={[styles.input, error ? styles.inputError : null]}
-        value={email}
-        onChangeText={onChangeEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        returnKeyType="done"
-        onSubmitEditing={onSubmit}
+      <Controller
+        control={control}
+        name="email"
+        rules={{
+          required: "Email is required",
+          pattern: {
+            value: /^\S+@\S+\.\S+$/,
+            message: "Enter a valid email",
+          },
+        }}
+        render={({ field: { value, onChange, onBlur } }) => (
+          <TextInput
+            placeholder="Enter your email"
+            style={[styles.input, errors.email ? styles.inputError : null]}
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            returnKeyType="done"
+            onSubmitEditing={handleSubmit(onSubmit)}
+          />
+        )}
       />
 
-      {!!error && <Text style={styles.error}>{error}</Text>}
+      {!!errors.email && (
+        <Text style={styles.error}>{errors.email.message}</Text>
+      )}
 
       <TouchableOpacity
         style={[styles.button, loading ? styles.buttonDisabled : null]}
-        onPress={onSubmit}
+        onPress={handleSubmit(onSubmit)}
         disabled={loading}
       >
         {loading ? (
