@@ -24,6 +24,33 @@ type ProductItem = {
   images?: string[];
 };
 
+const getCategoryIcon = (category: string) => {
+  const key = category.toLowerCase().trim();
+
+  switch (key) {
+    case "shoes":
+      return "footsteps-outline";
+
+    case "home":
+      return "home-outline";
+
+    case "beauty":
+      return "sparkles-outline";
+
+    case "electronics":
+      return "phone-portrait-outline";
+
+    case "sports":
+      return "barbell-outline";
+
+    case "clothes":
+      return "shirt-outline";
+
+    default:
+      return "pricetag-outline";
+  }
+};
+
 export default function CategoriesScreen() {
   const { width } = useWindowDimensions();
   const cardWidth = width >= 768 ? "30%" : "47%";
@@ -94,7 +121,6 @@ export default function CategoriesScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
           <Text style={styles.title}>Categories</Text>
-
           <Text style={styles.subtitle}>Tap a category to view products</Text>
 
           <FlatList
@@ -111,7 +137,7 @@ export default function CategoriesScreen() {
               >
                 <View style={styles.iconBox}>
                   <Ionicons
-                    name="pricetag-outline"
+                    name={getCategoryIcon(item.title)}
                     size={26}
                     color="#FF6A00"
                   />
@@ -119,7 +145,9 @@ export default function CategoriesScreen() {
 
                 <Text style={styles.cardTitle}>{item.title}</Text>
 
-                <Text style={styles.cardSub}>{item.count} products</Text>
+                <Text style={styles.cardSub}>
+                  {item.count} products
+                </Text>
 
                 <Text style={styles.price}>
                   ${item.min} - ${item.max}
@@ -156,24 +184,23 @@ export default function CategoriesScreen() {
           contentContainerStyle={{ paddingBottom: 30 }}
           renderItem={({ item }) => (
             <ProductCard
-            item={item}
-            onPress={() =>
-              router.push({
-                pathname: "/product-detail",
-                params: {
-                  id: item.id,
-                  productName: item.productName,
-                  price: item.price.toString(),
-                  category: item.category,
-                  images: JSON.stringify(item.images || []),
-          
-                  description: (item as any).description || "",
-                  brand: (item as any).brand || "",
-                  stock: String((item as any).stock || 0),
-                },
-              })
-            }
-          />
+              item={item}
+              onPress={() =>
+                router.push({
+                  pathname: "/product-detail",
+                  params: {
+                    id: item.id,
+                    productName: item.productName,
+                    price: item.price.toString(),
+                    category: item.category,
+                    images: JSON.stringify(item.images || []),
+                    description: (item as any).description || "",
+                    brand: (item as any).brand || "",
+                    stock: String((item as any).stock || 0),
+                  },
+                })
+              }
+            />
           )}
           ListEmptyComponent={
             <Text style={styles.empty}>No products found</Text>
